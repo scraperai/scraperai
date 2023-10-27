@@ -1,0 +1,5 @@
+/.idea/
+/venv/
+/backend/.env
+/backend/research/figures
+/backend/research/files/
