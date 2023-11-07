@@ -1,6 +1,6 @@
-/.idea/
+/.idea
 /venv/
-/backend/.env
+/backend/.env*
 /backend/research/figures
 /backend/research/files/
 /backend/static/

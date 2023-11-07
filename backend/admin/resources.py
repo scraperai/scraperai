@@ -123,11 +123,3 @@ class DocumentationLink(Link):
     url = "https://fastapi-admin-docs.long2ice.io"
     icon = "fas fa-file-code"
     target = "_blank"
-
-
-@app.register
-class ProLink(Link):
-    label = "Pro Version"
-    url = "https://fastapi-admin-pro.long2ice.io/admin/login"
-    icon = "far fa-heart"
-    target = "_blank"

@@ -19,7 +19,7 @@ from fastapi_admin.exceptions import (
 from admin.models import Admin
 from settings import REDIS_URL, BASE_DIR
 from .routes import (home, switch_config_status)
-from .resources import (AdminResource, ConfigResource, ProLink, GithubLink, DocumentationLink)
+from .resources import (AdminResource, ConfigResource, GithubLink, DocumentationLink)
 from .providers import LoginProvider
 
 
