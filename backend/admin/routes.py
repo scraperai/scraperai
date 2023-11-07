@@ -3,7 +3,7 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER, HTTP_404_NOT_FOUND
 
-from models import Config
+from admin.models import Config
 from fastapi_admin.app import app
 from fastapi_admin.depends import get_resources
 from fastapi_admin.template import templates

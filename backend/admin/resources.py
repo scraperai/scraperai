@@ -4,14 +4,14 @@ from typing import List
 from starlette.requests import Request
 
 from settings import BASE_DIR
-from models import Admin, Config, Status
+from admin.models import Admin, Config, Status
 from fastapi_admin.app import app
 from fastapi_admin.enums import Method
 from fastapi_admin.file_upload import FileUpload
 from fastapi_admin.resources import Action, Dropdown, Field, Link, Model, ToolbarAction
 from fastapi_admin.widgets import displays, filters, inputs
 
-upload = FileUpload(uploads_dir=os.path.join(BASE_DIR, "static", "uploads"))
+upload = FileUpload(uploads_dir=os.path.join(BASE_DIR, "../static", "uploads"))
 
 
 @app.register
