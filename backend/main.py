@@ -7,6 +7,8 @@ from tortoise.contrib.fastapi import register_tortoise
 
 from settings import BASE_DIR, DATABASE_URL
 import admin
+import api
+
 
 app = FastAPI()
 app.mount(
@@ -24,6 +26,7 @@ app.add_middleware(
 )
 
 admin.register(app)
+api.register(app)
 
 register_tortoise(
     app,
