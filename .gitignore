@@ -3,3 +3,5 @@
 /backend/.env
 /backend/research/figures
 /backend/research/files/
+/backend/static/
+/backend/db.sqlite3*

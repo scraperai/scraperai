@@ -16,3 +16,5 @@ if os.path.exists(BASE_DIR / '.env'):
     load_dotenv(BASE_DIR / '.env')
 
 OPEN_AI_TOKEN = os.getenv('OPEN_AI_TOKEN')
+DATABASE_URL = os.getenv("DATABASE_URL")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
