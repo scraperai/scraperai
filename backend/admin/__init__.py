@@ -16,10 +16,10 @@ from fastapi_admin.exceptions import (
     unauthorized_error_exception,
 )
 
-from admin.models import Admin
+from api.auth.models import User
 from settings import REDIS_URL, BASE_DIR
 from .routes import (home, switch_config_status)
-from .resources import (AdminResource, ConfigResource, GithubLink, DocumentationLink)
+from .resources import (UserResource, ConfigResource, GithubLink, DocumentationLink)
 from .providers import LoginProvider
 
 
@@ -45,7 +45,7 @@ async def on_startup():
         providers=[
             LoginProvider(
                 login_logo_url="https://preview.tabler.io/static/logo.svg",
-                admin_model=Admin,
+                admin_model=User,
             )
         ],
         redis=r,

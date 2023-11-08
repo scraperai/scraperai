@@ -11,14 +11,14 @@ from api.auth.models import User, Token
 from api.auth.api_models import UserSignupForm, PasswordChangeForm, PasswordResetResponse
 from api.auth.google import oauth
 from api.auth import yandex
-from api.auth.cookies_oauth import OAuth2PasswordBearerWithCookie
+from api.auth.cookies_oauth import CookieUserSchema
 from fastapi_admin.utils import hash_password, check_password
 
 from api.auth.utils import send_email
 
 REDIRECT_URL_KEY = 'redirect-to'
 
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/auth")
+oauth2_scheme = CookieUserSchema(tokenUrl="/api/auth")
 UserResponse = User.get_pydantic()
 TokenResponse = Token.get_pydantic()
 
@@ -29,19 +29,21 @@ async def auth_3rd_party(email: str, full_name: str, redirect_url: str) -> Redir
     user = await User.get_or_none(email=email)
     if not user:
         user = await User.create(
+            username=email,
             email=email,
             full_name=full_name,
             password=secrets.token_urlsafe(10)
         )
     token_obj = await Token.get_for_user(user)
     response = RedirectResponse(redirect_url)
-    response.set_cookie(key="access_token", value=f"Bearer {token_obj.access_token}", httponly=True)
+    response.set_cookie(key=CookieUserSchema.KEY, value=f"Bearer {token_obj.access_token}", httponly=True)
     return response
 
 
 @router.post('/signup', response_model=UserResponse)
 async def signup(user_in: UserSignupForm):
     user = await User.create(
+        username=user_in.email,
         email=user_in.email,
         full_name=user_in.full_name,
         password=hash_password(user_in.password)
@@ -65,7 +67,7 @@ async def auth(form_data: OAuth2PasswordRequestForm = Depends()):
 
     token_obj = await Token.get_for_user(user)
     response = JSONResponse(content={'status': 'success'})
-    response.set_cookie(key="access_token", value=f"Bearer {token_obj.access_token}", httponly=True)
+    response.set_cookie(key=CookieUserSchema.KEY, value=f"Bearer {token_obj.access_token}", httponly=True)
     return response
 
 
@@ -138,7 +140,7 @@ async def reset_password(email: EmailStr, verification_code: str):
 
     response = PasswordResetResponse(new_password=new_password)
     response = JSONResponse(content=jsonable_encoder(response))
-    response.set_cookie(key="access_token", value=f"Bearer {token_obj.access_token}", httponly=True)
+    response.set_cookie(key=CookieUserSchema.KEY, value=f"Bearer {token_obj.access_token}", httponly=True)
     return response
 
 

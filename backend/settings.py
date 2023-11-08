@@ -31,14 +31,20 @@ SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
 OPEN_AI_TOKEN = os.getenv('OPEN_AI_TOKEN')
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+REDIS_URL = os.getenv("REDIS_URL")
 
 
 TORTOISE_ORM = {
     "connections": {"default": DATABASE_URL},
     "apps": {
         "models": {
-            "models": ["admin.models", "api.auth.models", "aerich.models"],
+            "models": [
+                "admin.models",
+                "api.auth.models",
+                "api.users.models",
+                "api.subscriptions.models",
+                "aerich.models"
+            ],
             "default_connection": "default",
         }
     },

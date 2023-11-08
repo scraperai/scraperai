@@ -1,4 +1,5 @@
 import os
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -9,7 +10,8 @@ from tortoise.contrib.fastapi import register_tortoise
 import settings
 import admin
 import api
-
+from api.auth.models import User
+from api.subscriptions.models import SubscriptionPlan
 
 app = FastAPI()
 app.mount(
@@ -37,8 +39,10 @@ register_tortoise(app, config=settings.TORTOISE_ORM, generate_schemas=False)
 @app.on_event("startup")
 async def startup():
     await admin.on_startup()
+    await SubscriptionPlan.create_defaults()
+    await User.create_defaults()
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def index():
     return RedirectResponse(url="/admin")
