@@ -17,7 +17,14 @@ if os.path.exists(BASE_DIR / '.env'):
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+YANDEX_CLIENT_ID = os.getenv('YANDEX_CLIENT_ID')
+YANDEX_CLIENT_SECRET = os.getenv('YANDEX_CLIENT_SECRET')
+
 OPEN_AI_TOKEN = os.getenv('OPEN_AI_TOKEN')
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
