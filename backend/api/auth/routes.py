@@ -5,7 +5,6 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import EmailStr
 from starlette import status
-from tortoise.contrib.pydantic import pydantic_model_creator
 
 from api.api_models import SuccessResponse
 from api.auth.models import User, Token

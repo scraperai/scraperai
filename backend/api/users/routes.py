@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from tortoise.contrib.pydantic import pydantic_model_creator
 
 from api.auth.cookies_oauth import OAuth2PasswordBearerWithCookie
 from api.auth.models import User
