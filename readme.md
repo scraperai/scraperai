@@ -12,4 +12,5 @@ aerich init-db
 Migraion:
 ```
 aerich migrate
+aerich upgrade
 ```
