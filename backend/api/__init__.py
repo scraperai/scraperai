@@ -1,12 +1,11 @@
-from fastapi import FastAPI
-
-app = FastAPI()
-
-
-def register(parent_app: FastAPI):
-    parent_app.mount('/api', app)
+from fastapi import APIRouter
+from api.auth.routes import router as auth_router
 
 
-@app.get('/')
+router = APIRouter()
+router.include_router(auth_router)
+
+
+@router.get('/')
 def index():
     return {'status': 'success'}

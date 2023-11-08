@@ -65,7 +65,8 @@ class AdminResource(Model):
         return await super().cell_attributes(request, obj, field)
 
     async def get_actions(self, request: Request) -> List[Action]:
-        return []
+        actions = await super().get_actions(request)
+        return actions
 
     async def get_bulk_actions(self, request: Request) -> List[Action]:
         return []

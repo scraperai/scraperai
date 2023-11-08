@@ -5,7 +5,7 @@ from starlette.responses import RedirectResponse
 from starlette.staticfiles import StaticFiles
 from tortoise.contrib.fastapi import register_tortoise
 
-from settings import BASE_DIR, DATABASE_URL
+from settings import BASE_DIR, TORTOISE_ORM
 import admin
 import api
 
@@ -26,19 +26,12 @@ app.add_middleware(
 )
 
 admin.register(app)
-api.register(app)
+app.include_router(api.router, prefix='/api')
+
 
 register_tortoise(
     app,
-    config={
-        "connections": {"default": DATABASE_URL},
-        "apps": {
-            "models": {
-                "models": ["admin.models"],
-                "default_connection": "default",
-            }
-        },
-    },
+    config=TORTOISE_ORM,
     generate_schemas=True,
 )
 
