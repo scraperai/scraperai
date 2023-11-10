@@ -1,0 +1,27 @@
+version: "3"
+
+volumes:
+  redis:
+
+
+services:
+  app:
+    build: ./backend
+    restart: always
+    env_file: ./backend/.env.prod
+    image: fastapi-admin
+    command: uvicorn main:app --port 8000 --host 0.0.0.0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/:/backend/
+    depends_on:
+      - redis
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis:/data
+    ports:
+      - 6379:6379
+    restart: always
+    command: redis-server --appendonly yes --replica-read-only no
