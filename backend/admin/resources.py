@@ -47,21 +47,6 @@ class UserResource(Model):
         "updated_at"
     ]
 
-    # async def get_toolbar_actions(self, request: Request) -> List[ToolbarAction]:
-    #     return []
-    #
-    # async def cell_attributes(self, request: Request, obj: dict, field: Field) -> dict:
-    #     if field.name == "id":
-    #         return {"class": "bg-danger text-white"}
-    #     return await super().cell_attributes(request, obj, field)
-    #
-    # async def get_actions(self, request: Request) -> List[Action]:
-    #     actions = await super().get_actions(request)
-    #     return actions
-    #
-    # async def get_bulk_actions(self, request: Request) -> List[Action]:
-    #     return []
-
 
 @app.register
 class ConfigResource(Model):
@@ -133,7 +118,7 @@ class Content(Dropdown):
 @app.register
 class GithubLink(Link):
     label = "Github"
-    url = "https://github.com/fastapi-admin/fastapi-admin"
+    url = "https://github.com/iakov-kaiumov/scraper-ai"
     icon = "fab fa-github"
     target = "_blank"
 

@@ -1,15 +1,15 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, APIRouter
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER, HTTP_404_NOT_FOUND
 
 from admin.models import Config
-from fastapi_admin.app import app
+from fastapi_admin.routes import router
 from fastapi_admin.depends import get_resources
 from fastapi_admin.template import templates
 
 
-@app.get("/")
+@router.get("/")
 async def home(
     request: Request,
     resources=Depends(get_resources),
@@ -26,7 +26,7 @@ async def home(
     )
 
 
-@app.put("/config/switch_status/{config_id}")
+@router.put("/config/switch_status/{config_id}")
 async def switch_config_status(request: Request, config_id: int):
     config = await Config.get_or_none(pk=config_id)
     if not config:

@@ -18,7 +18,7 @@ from fastapi_admin.exceptions import (
 
 from api.auth.models import User
 from settings import REDIS_URL, BASE_DIR
-from .routes import (home, switch_config_status)
+from .routes import router
 from .resources import (UserResource, ConfigResource, GithubLink, DocumentationLink)
 from .providers import LoginProvider
 
@@ -28,7 +28,7 @@ def register(app: FastAPI):
     admin_app.add_exception_handler(HTTP_404_NOT_FOUND, not_found_error_exception)
     admin_app.add_exception_handler(HTTP_403_FORBIDDEN, forbidden_error_exception)
     admin_app.add_exception_handler(HTTP_401_UNAUTHORIZED, unauthorized_error_exception)
-
+    admin_app.include_router(router)
     app.mount("/admin", admin_app)
 
 
@@ -39,14 +39,17 @@ async def on_startup():
         encoding="utf8",
     )
     await admin_app.configure(
-        logo_url="https://preview.tabler.io/static/logo-white.svg",
-        template_folders=[os.path.join(BASE_DIR, "templates")],
+        admin_path="/admin",
+        logo_url="/static/logo.png",
         favicon_url="https://raw.githubusercontent.com/fastapi-admin/fastapi-admin/dev/images/favicon.png",
+        template_folders=[os.path.join(BASE_DIR, "templates")],
         providers=[
             LoginProvider(
-                login_logo_url="https://preview.tabler.io/static/logo.svg",
+                login_logo_url="/static/logo.png",
                 admin_model=User,
             )
         ],
+        default_locale='en_US',
+        language_switch=False,
         redis=r,
     )

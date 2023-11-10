@@ -7,6 +7,7 @@ from tortoise.models import Model
 
 
 class Feedback(Model):
+    user = fields.ForeignKeyField('models.User', related_name='feedback', null=True)
     email = fields.CharField(max_length=256, null=True)
     name = fields.CharField(max_length=256, null=True)
     text = fields.TextField()
