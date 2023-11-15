@@ -16,6 +16,7 @@ class User(AbstractAdmin):
     email = fields.CharField(max_length=255, null=True)
     full_name = fields.CharField(max_length=255, null=True)
     verification_code = fields.CharField(max_length=64, null=True)
+    balance = fields.DecimalField(max_digits=12, decimal_places=2, default=0)
     updated_at = fields.DatetimeField(default=datetime.datetime.now)
     created_at = fields.DatetimeField(auto_now_add=True)
 

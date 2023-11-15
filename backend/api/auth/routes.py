@@ -59,6 +59,8 @@ async def auth(form_data: OAuth2PasswordRequestForm = Depends()):
     #         detail="Incorrent client secret"
     #     )
     user = await User.get_or_none(email=form_data.username)
+    print(form_data.password)
+    print(check_password(form_data.password, user.password))
     if not user or not check_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

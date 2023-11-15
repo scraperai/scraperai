@@ -1,36 +1,16 @@
 from __future__ import annotations
 
 import datetime
-import enum
 from tortoise import fields
+from tortoise.contrib.pydantic import pydantic_model_creator
 from tortoise.models import Model
 
+from api.payments.services.base.dto import OrderStatus, Currency, PaymentProvider
 
-class Currency(str, enum.Enum):
-    RUB = 'RUB'
-    USD = 'USD'
-
-
-class OrderStatus(str, enum.Enum):
-    NEW = 'NEW'
-    AWAIT_PAYMENT = 'AWAIT_PAYMENT'
-    AWAIT_RESERVATION = 'AWAIT_RESERVATION'
-    RESERVATION_SUCCESS = 'RESERVATION_SUCCESS'
-    PAYMENT_SUCCESS = 'PAYMENT_SUCCESS'
-    WITHOUT_DOCS = 'WITHOUT_DOCS'
-    ON_APPROVAL = 'ON_APPROVAL'
-    APPROVAL_SUCCESS = 'APPROVAL_SUCCESS'
-    VERIFY_FAILED = 'VERIFY_FAILED'
-    AWAIT_CONFIRM_PAYMENT = 'AWAIT_CONFIRM_PAYMENT'
-    CONFIRM_PAYMENT_FAILED = 'CONFIRM_PAYMENT_FAILED'
-    BOOKED = 'BOOKED'
-    ACTIVE = 'ACTIVE'
-    COMPLETED = 'COMPLETED'
-    CANCELED = 'CANCELED'
-    REJECTED = 'REJECTED'
-    ON_REINIT = 'ON_REINIT'
-    REINIT_FAILED = 'REINIT_FAILED'
-    PAYMENT_SESSION_EXPIRED = 'PAYMENT_SESSION_EXPIRED'
+CREDITS_CONVERTER = {
+    Currency.RUB: 1.0,
+    Currency.USD: 100.0
+}
 
 
 class Order(Model):
@@ -38,5 +18,14 @@ class Order(Model):
     status = fields.CharEnumField(enum_type=OrderStatus)
     amount = fields.DecimalField(max_digits=10, decimal_places=2)
     currency = fields.CharEnumField(enum_type=Currency, default=Currency.RUB)
+    multiplicator = fields.FloatField()
     updated_at = fields.DatetimeField(default=datetime.datetime.now)
     created_at = fields.DatetimeField(auto_now_add=True)
+
+    payment_provider = fields.CharEnumField(enum_type=PaymentProvider, default=PaymentProvider.tinkoff)
+    payment_id = fields.CharField(max_length=255, null=True)
+    payment_url = fields.CharField(max_length=255, null=True)
+
+    @staticmethod
+    def get_pydantic():
+        return pydantic_model_creator(Order, exclude=('user', ))

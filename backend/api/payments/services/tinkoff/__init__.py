@@ -1,1 +1,1 @@
-from .api_client import TinkoffPaymentsApiClient
+from .api_client import TinkoffApiClient
