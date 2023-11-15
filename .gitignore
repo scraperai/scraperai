@@ -1,4 +1,6 @@
 /.idea
+/core/.idea
+/backend/.idea
 /venv/
 
 /core/research/figures

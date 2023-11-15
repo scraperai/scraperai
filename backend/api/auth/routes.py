@@ -174,6 +174,6 @@ async def auth_yandex(request: Request, redirect_url: str):
 @router.get('/yandex/callback', include_in_schema=False)
 async def auth_yandex_callback(request: Request):
     code = request.query_params.get('code')
-    token = yandex.get_token_by_code(code)
-    email, full_name = yandex.get_user_info(token)
+    token = await yandex.get_token_by_code(code)
+    email, full_name = await yandex.get_user_info(token)
     return await auth_3rd_party(email, full_name, redirect_url=request.session.get(REDIRECT_URL_KEY))

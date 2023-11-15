@@ -1,6 +1,6 @@
 import base64
 
-import requests
+import httpx
 from starlette.datastructures import URL
 
 import settings
@@ -13,7 +13,7 @@ def get_oauth_url(redirect_uri: URL) -> str:
            f'&redirect_uri={redirect_uri}'
 
 
-def get_token_by_code(code: str) -> str:
+async def get_token_by_code(code: str) -> str:
     url = 'https://oauth.yandex.ru/token'
     data = {
         'code': code,
@@ -26,11 +26,13 @@ def get_token_by_code(code: str) -> str:
     headers = {
         'Authorization': f'Basic {y_token}'
     }
-    response = requests.post(url, data=data, headers=headers).json()
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, data=data, headers=headers)
+        response = response.json()
     return response['access_token']
 
 
-def get_user_info(token: str) -> tuple[str, str]:
+async def get_user_info(token: str) -> tuple[str, str]:
     """
     Fetches Yandex's user' info
     :return: tuple of (email, full_name)
@@ -39,5 +41,7 @@ def get_user_info(token: str) -> tuple[str, str]:
     headers = {
         'Authorization': f'OAuth {token}'
     }
-    response = requests.get(url, params={'format': 'json'}, headers=headers).json()
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params={'format': 'json'}, headers=headers)
+        response = response.json()
     return response['default_email'], response['real_name']

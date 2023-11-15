@@ -13,6 +13,8 @@ from fastapi_admin.resources import Action, Dropdown, Field, Link, Model, Toolba
 from fastapi_admin.widgets import displays, filters, inputs
 from api.subscriptions.models import SubscriptionPlan
 from api.auth.models import User
+
+
 upload = FileUpload(uploads_dir=os.path.join(BASE_DIR, "../static", "uploads"))
 
 
