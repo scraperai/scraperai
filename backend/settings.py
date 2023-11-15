@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 from pathlib import Path
@@ -27,6 +28,11 @@ SMTP_HOST = os.getenv('SMTP_HOST')
 SMTP_PORT = os.getenv('SMTP_PORT')
 SMTP_USER = os.getenv('SMTP_USER')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
+
+TINKOFF_API_URL = 'https://securepay.tinkoff.ru/v2'
+TINKOFF_TERMINAL_KEY = os.getenv('TINKOFF_TERMINAL_KEY')
+TINKOFF_PASSWORD = os.getenv('TINKOFF_PASSWORD')
+TINKOFF_PAYMENT_SESSION_LIFETIME = datetime.timedelta(minutes=20)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 REDIS_URL = os.getenv("REDIS_URL")

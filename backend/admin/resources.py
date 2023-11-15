@@ -11,7 +11,6 @@ from fastapi_admin.enums import Method
 from fastapi_admin.file_upload import FileUpload
 from fastapi_admin.resources import Action, Dropdown, Field, Link, Model, ToolbarAction
 from fastapi_admin.widgets import displays, filters, inputs
-from api.subscriptions.models import SubscriptionPlan
 from api.auth.models import User
 
 
@@ -91,16 +90,6 @@ class ConfigResource(Model):
 @app.register
 class Content(Dropdown):
 
-    class SubscriptionResource(Model):
-        label = "Subscription"
-        model = SubscriptionPlan
-        filters = []
-        fields = [
-            "name",
-            "price",
-            "duration",
-        ]
-
     class FeedbackResource(Model):
         label = "Feedback"
         model = Feedback
@@ -114,7 +103,7 @@ class Content(Dropdown):
 
     label = "Content"
     icon = "fas fa-bars"
-    resources = [SubscriptionResource, FeedbackResource]
+    resources = [FeedbackResource]
 
 
 @app.register
