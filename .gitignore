@@ -1,8 +1,9 @@
 /.idea
 /venv/
-/backend/.env*
-/backend/research/figures
-/backend/research/files/
+
+/core/research/figures
+/core/research/files/
 /backend/db.sqlite3*
 
 *.rdb
+*.env*

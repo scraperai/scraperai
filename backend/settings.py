@@ -28,8 +28,6 @@ SMTP_PORT = os.getenv('SMTP_PORT')
 SMTP_USER = os.getenv('SMTP_USER')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
 
-OPEN_AI_TOKEN = os.getenv('OPEN_AI_TOKEN')
-
 DATABASE_URL = os.getenv("DATABASE_URL")
 REDIS_URL = os.getenv("REDIS_URL")
 
