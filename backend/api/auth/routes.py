@@ -7,7 +7,7 @@ from pydantic import EmailStr
 from starlette import status
 
 from api.api_models import SuccessResponse
-from api.auth.models import User, Token
+from models.auth.models import User, Token
 from api.auth.api_models import UserSignupForm, PasswordChangeForm, PasswordResetResponse
 from api.auth.google import oauth
 from api.auth import yandex

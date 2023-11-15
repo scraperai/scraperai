@@ -18,7 +18,6 @@ class User(AbstractAdmin):
     verification_code = fields.CharField(max_length=64, null=True)
     updated_at = fields.DatetimeField(default=datetime.datetime.now)
     created_at = fields.DatetimeField(auto_now_add=True)
-    subscription = fields.ForeignKeyField('models.SubscriptionPlan', related_name='users', null=True)
 
     def __str__(self):
         return self.email

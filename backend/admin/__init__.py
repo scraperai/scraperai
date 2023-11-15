@@ -16,10 +16,10 @@ from fastapi_admin.exceptions import (
     unauthorized_error_exception,
 )
 
-from api.auth.models import User
+from models.auth.models import User
 from settings import REDIS_URL, BASE_DIR
 from .routes import router
-from .resources import (UserResource, ConfigResource, GithubLink, DocumentationLink)
+from .resources import (UserResource, GithubLink, DocumentationLink)
 from .providers import LoginProvider
 
 

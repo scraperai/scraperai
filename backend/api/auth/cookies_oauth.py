@@ -7,7 +7,7 @@ from fastapi import status
 from typing import Optional
 from typing import Dict
 
-from api.auth.models import User
+from models.auth.models import User
 
 
 class CookieBearerSchema(OAuth2):

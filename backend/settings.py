@@ -43,10 +43,9 @@ TORTOISE_ORM = {
     "apps": {
         "models": {
             "models": [
-                "admin.models",
-                "api.auth.models",
-                "api.users.models",
-                "api.subscriptions.models",
+                "models.auth.models",
+                "models.users.models",
+                "models.payments.models",
                 "aerich.models"
             ],
             "default_connection": "default",
