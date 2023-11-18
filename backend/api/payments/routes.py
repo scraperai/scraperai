@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
 
-from api.auth.cookies_oauth import CookieUserSchema
+from api.auth.oauth.schemas import OAuthSchemasBuilder
 from api.payments.api_models import PaymentCreationForm, TinkoffNotification
 from api.payments.services.base.dto import BasePaymentInfo
 from api.payments.services.payment_service import PaymentProvider, PaymentService
@@ -10,8 +10,8 @@ from models.payments.models import Order
 
 
 OrderResponse = Order.get_pydantic()
-strict_user_schema = CookieUserSchema(tokenUrl="/api/auth", auto_error=True)
-user_schema = CookieUserSchema(tokenUrl="/api/auth", auto_error=False)
+strict_user_schema = OAuthSchemasBuilder.build(auto_error=True)
+user_schema = OAuthSchemasBuilder.build(auto_error=False)
 router = APIRouter(tags=['Payments'], prefix='/payment')
 
 

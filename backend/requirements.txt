@@ -10,6 +10,7 @@ aioredis==2.0.1
 # API
 fastapi==0.104.0
 fastapi-admin==1.0.4
+fastapi-jwt==0.2.0
 uvicorn==0.23.2
 PyJWT==2.8.0
 httpx==0.25.1

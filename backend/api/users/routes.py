@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends
 
 from api.api_models import SuccessResponse
-from api.auth.cookies_oauth import CookieUserSchema
+from api.auth.oauth.schemas import OAuthSchemasBuilder
 from models.auth.models import User
 from api.users.api_models import FeedbackForm
 from models.users.models import Feedback
 
 
 UserResponse = User.get_pydantic()
-strict_user_schema = CookieUserSchema(tokenUrl="/api/auth", auto_error=True)
-user_schema = CookieUserSchema(tokenUrl="/api/auth", auto_error=False)
+strict_user_schema = OAuthSchemasBuilder.build(auto_error=True)
+user_schema = OAuthSchemasBuilder.build(auto_error=False)
 router = APIRouter(tags=['User'], prefix='/users')
 
 

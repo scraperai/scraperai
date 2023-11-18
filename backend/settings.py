@@ -17,6 +17,7 @@ if os.path.exists(BASE_DIR / '.env'):
     load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
+OAUTH_SECRET_KEY = os.getenv('OAUTH_SECRET_KEY')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')

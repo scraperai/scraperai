@@ -1,5 +1,5 @@
 import secrets
-from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks, Security
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -7,20 +7,19 @@ from pydantic import EmailStr
 from starlette import status
 
 from api.api_models import SuccessResponse
-from models.auth.models import User, Token
+from api.auth.oauth.schemas import OAuthSchemasBuilder
+from models.auth.models import User
 from api.auth.api_models import UserSignupForm, PasswordChangeForm, PasswordResetResponse
 from api.auth.google import oauth
 from api.auth import yandex
-from api.auth.cookies_oauth import CookieUserSchema
 from fastapi_admin.utils import hash_password, check_password
 
 from api.auth.utils import send_email
 
 REDIRECT_URL_KEY = 'redirect-to'
 
-oauth2_scheme = CookieUserSchema(tokenUrl="/api/auth")
+oauth_schema = OAuthSchemasBuilder.build()
 UserResponse = User.get_pydantic()
-TokenResponse = Token.get_pydantic()
 
 router = APIRouter(tags=['Auth'], prefix='/auth')
 
@@ -34,9 +33,9 @@ async def auth_3rd_party(email: str, full_name: str, redirect_url: str) -> Redir
             full_name=full_name,
             password=secrets.token_urlsafe(10)
         )
-    token_obj = await Token.get_for_user(user)
+
     response = RedirectResponse(redirect_url)
-    response.set_cookie(key=CookieUserSchema.KEY, value=f"Bearer {token_obj.access_token}", httponly=True)
+    oauth_schema.create_and_set_tokens(response, user.pk)
     return response
 
 
@@ -67,15 +66,23 @@ async def auth(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect username or password",
         )
 
-    token_obj = await Token.get_for_user(user)
     response = JSONResponse(content={'status': 'success'})
-    response.set_cookie(key=CookieUserSchema.KEY, value=f"Bearer {token_obj.access_token}", httponly=True)
+    oauth_schema.create_and_set_tokens(response, user.pk)
+    return response
+
+
+# TODO: Add refresh
+
+@router.get('/logout')
+async def logout(user: User = Security(oauth_schema)):
+    response = JSONResponse(content={'status': 'success'})
+    oauth_schema.unset_access_cookie(response)
+    oauth_schema.unset_refresh_cookie(response)
     return response
 
 
 @router.post('/change-password')
-async def change_password(form: PasswordChangeForm, token: str = Depends(oauth2_scheme)):
-    user = await User.from_token(token)
+async def change_password(form: PasswordChangeForm, user: User = Depends(oauth_schema)):
     if not check_password(form.current_password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -138,11 +145,9 @@ async def reset_password(email: EmailStr, verification_code: str):
     user.verification_code = None
     await user.save()
 
-    token_obj = await Token.get_for_user(user)
-
-    response = PasswordResetResponse(new_password=new_password)
-    response = JSONResponse(content=jsonable_encoder(response))
-    response.set_cookie(key=CookieUserSchema.KEY, value=f"Bearer {token_obj.access_token}", httponly=True)
+    data = PasswordResetResponse(new_password=new_password)
+    response = JSONResponse(content=jsonable_encoder(data))
+    oauth_schema.create_and_set_tokens(response, user.pk)
     return response
 
 
