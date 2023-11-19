@@ -7,3 +7,9 @@ class BaseResponse(BaseModel):
 
 class SuccessResponse(BaseResponse):
     status: str = 'success'
+
+
+class ErrorResponse(BaseResponse):
+    status: str = 'error'
+    detail: str
+

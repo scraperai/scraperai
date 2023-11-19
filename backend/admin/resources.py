@@ -5,8 +5,8 @@ from fastapi_admin.file_upload import FileUpload
 from fastapi_admin.resources import Dropdown, Field, Link, Model
 from fastapi_admin.widgets import filters, inputs
 
-from models.auth.models import User
-from models.users.models import Feedback
+from models.users import User
+from models.users import Feedback
 from settings import BASE_DIR
 
 upload = FileUpload(uploads_dir=os.path.join(BASE_DIR, "../static", "uploads"))

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 
 from api.api_models import SuccessResponse
 from api.auth.oauth.schemas import OAuthSchemasBuilder
-from models.auth.models import User
+from models.users import User
 from api.users.api_models import FeedbackForm
-from models.users.models import Feedback
+from models.users import Feedback
 
 
 UserResponse = User.get_pydantic()

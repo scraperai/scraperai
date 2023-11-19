@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from api.payments.services.base.dto import BasePaymentInfo, OrderStatus
+from models.payments import BasePaymentInfo, OrderStatus
 
 
 class PaymentApiClient(ABC):

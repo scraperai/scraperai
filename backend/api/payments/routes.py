@@ -3,10 +3,10 @@ from fastapi.responses import HTMLResponse
 
 from api.auth.oauth.schemas import OAuthSchemasBuilder
 from api.payments.api_models import PaymentCreationForm, TinkoffNotification
-from api.payments.services.base.dto import BasePaymentInfo
-from api.payments.services.payment_service import PaymentProvider, PaymentService
-from models.auth.models import User
-from models.payments.models import Order
+from models.payments import BasePaymentInfo, PaymentProvider
+from api.payments.services.payment_service import PaymentService
+from models.users import User
+from models.payments import Order
 
 
 OrderResponse = Order.get_pydantic()

@@ -44,9 +44,8 @@ TORTOISE_ORM = {
     "apps": {
         "models": {
             "models": [
-                "models.auth.models",
-                "models.users.models",
-                "models.payments.models",
+                "models.users",
+                "models.payments",
                 "aerich.models"
             ],
             "default_connection": "default",

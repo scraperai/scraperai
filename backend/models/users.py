@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import datetime
-
-from fastapi_admin.models import AbstractAdmin
-from fastapi_admin.utils import hash_password
 from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
+from tortoise.models import Model
+from fastapi_admin.models import AbstractAdmin
 
 
 class User(AbstractAdmin):
@@ -29,7 +28,23 @@ class User(AbstractAdmin):
             username='admin@example.com',
             defaults={
                 'email': 'admin@example.com',
-                'password': hash_password('password'),
+                'password': 'password',
                 'full_name': 'Admin'
             }
         )
+
+
+class Feedback(Model):
+    user = fields.ForeignKeyField('models.User', related_name='feedback', null=True)
+    email = fields.CharField(max_length=256, null=True)
+    name = fields.CharField(max_length=256, null=True)
+    text = fields.TextField()
+    updated_at = fields.DatetimeField(default=datetime.datetime.now)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.pk}_{self.text[:20]}'
+
+    @classmethod
+    def get_pydantic(cls):
+        return pydantic_model_creator(cls)

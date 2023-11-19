@@ -3,7 +3,7 @@ import asyncio
 import httpx
 
 from api.payments.services.base.api_client import PaymentApiClient
-from api.payments.services.base.dto import OrderStatus, BasePaymentInfo
+from models.payments import OrderStatus, BasePaymentInfo
 from api.payments.services.tinkoff.request_signer import TinkoffPaymentsRequestSigner
 
 

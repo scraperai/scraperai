@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from api.payments.services.base.dto import OrderStatus, Currency
+from models.payments import OrderStatus, Currency
 
 
 class PaymentCreationForm(BaseModel):

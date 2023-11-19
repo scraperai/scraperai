@@ -11,7 +11,7 @@ from tortoise.contrib.fastapi import register_tortoise
 import settings
 import admin
 import api
-from models.auth.models import User
+from models.users import User
 
 app = FastAPI()
 app.mount(

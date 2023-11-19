@@ -1,13 +1,17 @@
 from __future__ import annotations
-import enum
 
 import settings
 from api.payments.api_models import PaymentCreationForm
 from api.payments.services.base.api_client import PaymentApiClient
-from api.payments.services.base.dto import BasePaymentInfo, OrderStatus, PaymentProvider
+from models.payments import BasePaymentInfo, OrderStatus, PaymentProvider, Currency, Order
 from api.payments.services.tinkoff import TinkoffApiClient
-from models.auth.models import User
-from models.payments.models import Order, CREDITS_CONVERTER
+from models.users import User
+
+
+CREDITS_CONVERTER = {
+    Currency.RUB: 1.0,
+    Currency.USD: 100.0
+}
 
 
 class PaymentService:

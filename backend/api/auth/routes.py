@@ -8,17 +8,18 @@ from starlette import status
 
 from api.api_models import SuccessResponse
 from api.auth.oauth.schemas import OAuthSchemasBuilder
-from models.auth.models import User
+from models.users import User
 from api.auth.api_models import UserSignupForm, PasswordChangeForm, PasswordResetResponse
-from api.auth.google import oauth
-from api.auth import yandex
-from fastapi_admin.utils import hash_password, check_password
+from api.auth.external.google import oauth
+from api.auth.external import yandex
+from fastapi_admin.utils import check_password
 
 from api.auth.utils import send_email
 
 REDIRECT_URL_KEY = 'redirect-to'
 
 oauth_schema = OAuthSchemasBuilder.build()
+refresh_schema = OAuthSchemasBuilder.build_refresh_schema()
 UserResponse = User.get_pydantic()
 
 router = APIRouter(tags=['Auth'], prefix='/auth')
@@ -41,11 +42,17 @@ async def auth_3rd_party(email: str, full_name: str, redirect_url: str) -> Redir
 
 @router.post('/signup', response_model=UserResponse)
 async def signup(user_in: UserSignupForm):
+    existing_user = await User.get_or_none(email=user_in.email)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='This email is taken'
+        )
     user = await User.create(
         username=user_in.email,
         email=user_in.email,
         full_name=user_in.full_name,
-        password=hash_password(user_in.password)
+        password=user_in.password
     )
     return await UserResponse.from_tortoise_orm(user)
 
@@ -58,31 +65,34 @@ async def auth(form_data: OAuth2PasswordRequestForm = Depends()):
     #         detail="Incorrent client secret"
     #     )
     user = await User.get_or_none(email=form_data.username)
-    print(form_data.password)
-    print(check_password(form_data.password, user.password))
     if not user or not check_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
 
-    response = JSONResponse(content={'status': 'success'})
+    response = JSONResponse(content=SuccessResponse().__dict__)
     oauth_schema.create_and_set_tokens(response, user.pk)
     return response
 
 
-# TODO: Add refresh
+@router.post("/refresh")
+def refresh(user: User = Security(refresh_schema)):
+    response = JSONResponse(content=SuccessResponse().__dict__)
+    oauth_schema.create_and_set_tokens(response, user_id=user.pk)
+    return response
 
-@router.get('/logout')
+
+@router.post('/logout')
 async def logout(user: User = Security(oauth_schema)):
-    response = JSONResponse(content={'status': 'success'})
+    response = JSONResponse(content=SuccessResponse().__dict__)
     oauth_schema.unset_access_cookie(response)
     oauth_schema.unset_refresh_cookie(response)
     return response
 
 
 @router.post('/change-password')
-async def change_password(form: PasswordChangeForm, user: User = Depends(oauth_schema)):
+async def change_password(form: PasswordChangeForm, user: User = Security(oauth_schema)):
     if not check_password(form.current_password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -98,7 +108,7 @@ async def change_password(form: PasswordChangeForm, user: User = Depends(oauth_s
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="New password must be different from the old one"
         )
-    user.password = hash_password(form.new_password)
+    user.password = form.new_password
     await user.save()
     return SuccessResponse()
 
@@ -141,7 +151,7 @@ async def reset_password(email: EmailStr, verification_code: str):
             detail="Wrong code",
         )
     new_password = secrets.token_urlsafe(8)
-    user.password = hash_password(new_password)
+    user.password = new_password
     user.verification_code = None
     await user.save()
 

@@ -16,7 +16,7 @@ from fastapi_admin.exceptions import (
     unauthorized_error_exception,
 )
 
-from models.auth.models import User
+from models.users import User
 from settings import REDIS_URL, BASE_DIR
 from .routes import router
 from .resources import (UserResource, GithubLink, DocumentationLink)
