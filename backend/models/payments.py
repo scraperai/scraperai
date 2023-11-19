@@ -69,3 +69,21 @@ class Order(Model):
     @staticmethod
     def get_pydantic():
         return pydantic_model_creator(Order, exclude=('user', ))
+
+
+class TransactionStatus(str, enum.Enum):
+    NEW = 'NEW'
+    RUNNING = 'RUNNING'
+    CONFIRMED = 'CONFIRMED'
+    СANCELED = 'СANCELED'
+
+
+class Transaction(Model):
+    user = fields.ForeignKeyField('models.User', related_name='transactions')
+    status = fields.CharEnumField(enum_type=TransactionStatus)
+    credits_amount = fields.DecimalField(max_digits=10, decimal_places=2)
+    updated_at = fields.DatetimeField(default=datetime.datetime.now)
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'<Transaction: {self.pk} status: {self.status} amount: {self.credits_amount}>'
