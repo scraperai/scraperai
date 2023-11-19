@@ -19,7 +19,7 @@ from fastapi_admin.exceptions import (
 from models.users import User
 from settings import REDIS_URL, BASE_DIR
 from .routes import router
-from .resources import (UserResource, GithubLink, DocumentationLink)
+from .resources import (Users, GithubLink, DocumentationLink)
 from .providers import LoginProvider
 
 

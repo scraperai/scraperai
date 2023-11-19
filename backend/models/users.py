@@ -14,9 +14,14 @@ class User(AbstractAdmin):
     balance = fields.DecimalField(max_digits=12, decimal_places=2, default=0)
     updated_at = fields.DatetimeField(default=datetime.datetime.now)
     created_at = fields.DatetimeField(auto_now_add=True)
+    roles = fields.ManyToManyField('models.Role', related_name='users')
 
     def __str__(self):
         return self.email
+
+    @property
+    async def roles_set(self) -> set[str]:
+        return {x.key for x in await self.roles.all()}
 
     @staticmethod
     def get_pydantic():
@@ -24,14 +29,31 @@ class User(AbstractAdmin):
 
     @staticmethod
     async def create_defaults():
-        await User.get_or_create(
+        user, _ = await User.get_or_create(
             username='admin@example.com',
             defaults={
                 'email': 'admin@example.com',
                 'password': 'password',
-                'full_name': 'Admin'
+                'full_name': 'Admin',
             }
         )
+        role = await Role.get(key='admin')
+        await user.roles.add(role)
+
+
+class Role(Model):
+    key = fields.CharField(max_length=256)
+    name = fields.CharField(max_length=256)
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    async def create_defaults():
+        roles = [('admin', 'Administrator'), ('client', 'Client')]
+        for role in roles:
+            key, name = role
+            await Role.get_or_create(key=key, name=name)
 
 
 class Feedback(Model):

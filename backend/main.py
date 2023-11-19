@@ -11,7 +11,8 @@ from tortoise.contrib.fastapi import register_tortoise
 import settings
 import admin
 import api
-from models.users import User
+from models.users import User, Role
+
 
 app = FastAPI()
 app.mount(
@@ -39,6 +40,7 @@ register_tortoise(app, config=settings.TORTOISE_ORM, generate_schemas=False)
 @app.on_event("startup")
 async def startup():
     await admin.on_startup()
+    await Role.create_defaults()
     await User.create_defaults()
 
 
