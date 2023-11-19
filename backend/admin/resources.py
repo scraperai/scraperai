@@ -26,7 +26,6 @@ class Users(Dropdown):
         model = User
         page_pre_title = "Users"
         page_title = "User"
-        icon = "fas fa-user"
         filters = [
             filters.Search(
                 name="email",
