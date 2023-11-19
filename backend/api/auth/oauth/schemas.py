@@ -4,7 +4,7 @@ from .base import JwtUserAccessCookie, JwtUserRefreshCookie
 import settings
 
 
-access_expires_delta = datetime.timedelta(minutes=1)
+access_expires_delta = datetime.timedelta(hours=1)
 refresh_expires_delta = None
 
 

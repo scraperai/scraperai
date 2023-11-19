@@ -87,3 +87,7 @@ class Transaction(Model):
 
     def __str__(self):
         return f'<Transaction: {self.pk} status: {self.status} amount: {self.credits_amount}>'
+
+    @staticmethod
+    def get_pydantic():
+        return pydantic_model_creator(Transaction, exclude=('user', ))

@@ -46,6 +46,7 @@ TORTOISE_ORM = {
             "models": [
                 "models.users",
                 "models.payments",
+                "models.scraping",
                 "aerich.models"
             ],
             "default_connection": "default",
