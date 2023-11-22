@@ -3,9 +3,11 @@ aerich==0.7.2
 tortoise-orm==0.20.0
 aiosqlite==0.17.0
 
-# Celery and redis
+# Taskiq and redis
 redis==5.0.1
 aioredis==2.0.1
+taskiq==0.10.2
+taskiq-redis==0.5.3
 
 # API
 fastapi==0.104.0
@@ -21,3 +23,5 @@ aiosmtplib==3.0.1
 Authlib==1.2.1
 email-validator==2.1.0.post1
 python-dotenv==1.0.0
+
+

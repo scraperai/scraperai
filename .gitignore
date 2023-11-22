@@ -3,8 +3,7 @@
 /backend/.idea
 /venv/
 
-/core/research/figures
-/core/research/files/
+/core/research/
 /backend/db.sqlite3*
 
 *.rdb

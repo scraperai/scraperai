@@ -5,6 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
+# Logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     filemode='a',
@@ -12,6 +13,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+# Environment Keys
 BASE_DIR = Path(__file__).resolve().parent
 if os.path.exists(BASE_DIR / '.env'):
     load_dotenv(BASE_DIR / '.env')
@@ -39,6 +41,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 REDIS_URL = os.getenv("REDIS_URL")
 
 
+# Database Settings
 TORTOISE_ORM = {
     "connections": {"default": DATABASE_URL},
     "apps": {

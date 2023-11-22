@@ -84,7 +84,7 @@ def refresh(user: User = Security(refresh_schema)):
 
 
 @router.post('/logout')
-async def logout(user: User = Security(oauth_schema)):
+async def logout(user: User = Security(refresh_schema)):
     response = JSONResponse(content=SuccessResponse().__dict__)
     oauth_schema.unset_access_cookie(response)
     oauth_schema.unset_refresh_cookie(response)

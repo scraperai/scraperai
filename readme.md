@@ -2,6 +2,16 @@
 
 ## Backend
 
+### Development startup
+Server:
+```
+uvicorn main:app --reload
+```
+Taskiq:
+```
+taskiq worker tasks:broker
+```
+
 ### Database
 Database initialization:
 ```

@@ -12,7 +12,7 @@ import settings
 import admin
 import api
 from models.users import User, Role
-
+from tasks import broker
 
 app = FastAPI()
 app.mount(
@@ -37,11 +37,21 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 register_tortoise(app, config=settings.TORTOISE_ORM, generate_schemas=False)
 
 
-@app.on_event("startup")
+@app.on_event('startup')
 async def startup():
     await admin.on_startup()
     await Role.create_defaults()
     await User.create_defaults()
+
+    # if not broker.is_worker_process:
+    #     await broker.startup()
+
+
+@app.on_event('shutdown')
+async def app_shutdown():
+    pass
+    # if not broker.is_worker_process:
+    #     await broker.shutdown()
 
 
 @app.get("/", include_in_schema=False)

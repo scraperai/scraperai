@@ -41,6 +41,28 @@ CREATE TABLE IF NOT EXISTS "order" (
     "payment_url" VARCHAR(255),
     "user_id" INT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS "transaction" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    "status" VARCHAR(9) NOT NULL  /* NEW: NEW\nRUNNING: RUNNING\nCONFIRMED: CONFIRMED\nСANCELED: СANCELED */,
+    "credits_amount" VARCHAR(40) NOT NULL,
+    "updated_at" TIMESTAMP NOT NULL,
+    "created_at" TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "user_id" INT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "scrapingtask" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    "session_id" CHAR(36) NOT NULL,
+    "status" VARCHAR(7) NOT NULL  /* RUNNING: RUNNING\nWAIT: WAIT */,
+    "step" VARCHAR(9) NOT NULL  /* INIT: INIT\nDETECTION: DETECTION\nPAYMENT: PAYMENT\nSCRAPING: SCRAPING */,
+    "taskiq_id" CHAR(36),
+    "sources" JSON NOT NULL,
+    "temp_results" JSON,
+    "updated_at" TIMESTAMP NOT NULL,
+    "created_at" TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "transaction_id" INT REFERENCES "transaction" ("id") ON DELETE CASCADE,
+    "user_id" INT REFERENCES "user" ("id") ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "idx_scrapingtas_session_d8c104" ON "scrapingtask" ("session_id");
 CREATE TABLE IF NOT EXISTS "aerich" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     "version" VARCHAR(255) NOT NULL,
