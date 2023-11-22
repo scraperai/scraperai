@@ -1,0 +1,20 @@
+# Parsing
+htmlmin
+requests
+beautifulsoup4
+lxml
+selenium
+webdriver-manager
+
+# ML
+openai
+tiktoken
+
+
+# Data
+pandas
+
+# Others
+python-dotenv
+tqdm
+retry
