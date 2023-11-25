@@ -1,11 +1,11 @@
 import time
 import unittest
-from browser.local import LocalBrowserScraper
+from scraperai.browser.local import LocalBrowserScraper
 
 
 class DetectionTests(unittest.TestCase):
     def test_pagination(self):
-        from parsing.pagination import PaginationDetection
+        from scraperai.parsing.pagination import PaginationDetection
 
         scraper = LocalBrowserScraper()
         detector = PaginationDetection()

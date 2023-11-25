@@ -21,6 +21,6 @@ setup(
     long_description_content_type='text/markdown',
     license='MIT License',
     packages=find_packages(),
-    package_dir={'scraperai': 'core'},
+    package_dir={'scraperai': 'scraperai'},
     install_requires=requirements
 )

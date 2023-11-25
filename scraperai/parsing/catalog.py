@@ -4,9 +4,9 @@ import logging
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from utils import markdown_to_pandas, cut_large_request
-from llm.chat import OpenAIModel, OpenAIChatModel
-from utils.compressor import compress_html
+from scraperai.utils import markdown_to_pandas, cut_large_request
+from scraperai.llm.chat import OpenAIModel, OpenAIChatModel
+from scraperai.utils.compressor import compress_html
 
 
 logger = logging.getLogger(__file__)

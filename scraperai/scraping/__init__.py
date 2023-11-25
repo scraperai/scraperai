@@ -9,12 +9,12 @@ from lxml import etree
 from selenium.webdriver.common.by import By
 from tqdm import tqdm
 
-from browser.local import LocalBrowserScraper
-from llm.chat import OpenAIChatModel, OpenAIModel
-from parsing.pagination import PaginationDetection
-from parsing.catalog import CatalogParser
-from parsing.details import DetailsPageParser
-from utils import prettify_table
+from scraperai.browser.local import LocalBrowserScraper
+from scraperai.llm.chat import OpenAIChatModel, OpenAIModel
+from scraperai.parsing.pagination import PaginationDetection
+from scraperai.parsing.catalog import CatalogParser
+from scraperai.parsing.details import DetailsPageParser
+from scraperai.utils import prettify_table
 
 
 logger = logging.getLogger(__file__)

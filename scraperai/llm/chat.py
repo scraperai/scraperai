@@ -4,7 +4,7 @@ import openai
 from retry import retry
 
 import settings
-from llm.base import ChatModel
+from .base import ChatModel
 
 
 class OpenAIModel(enum.Enum):

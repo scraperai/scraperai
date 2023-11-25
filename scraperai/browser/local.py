@@ -7,8 +7,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-from browser.base import BrowserScraper
-from browser.storage import LocalStorage
+from scraperai.browser.base import BrowserScraper
+from scraperai.browser.storage import LocalStorage
 
 # Initializing a list with two Useragents
 with open(Path(__file__).resolve().parent / 'useragents.txt', 'r') as f:

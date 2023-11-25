@@ -3,7 +3,7 @@ from io import StringIO
 import pandas as pd
 import tiktoken
 
-from llm.chat import OpenAIModel
+from scraperai.llm.chat import OpenAIModel
 
 models_max_tokens = {
     OpenAIModel.gpt4: 8192,

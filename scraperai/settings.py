@@ -11,7 +11,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 if os.path.exists(BASE_DIR / '.env'):
     load_dotenv(BASE_DIR / '.env')
 

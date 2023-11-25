@@ -3,8 +3,9 @@
 /backend/.idea
 /venv/
 
-/core/research/
+/scraperai/research/
 /backend/db.sqlite3*
 
 *.rdb
 *.env*
+/scraperai.egg-info/
