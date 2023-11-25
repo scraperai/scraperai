@@ -1,9 +1,9 @@
 import enum
 
 import openai
+from openai import RateLimitError
 from retry import retry
 
-import settings
 from .base import ChatModel
 
 
@@ -14,11 +14,11 @@ class OpenAIModel(enum.Enum):
 
 
 class OpenAIChatModel(ChatModel):
-    def __init__(self, model: OpenAIModel = OpenAIModel.gpt4):
-        openai.api_key = settings.OPEN_AI_TOKEN
+    def __init__(self, api_key: str, model: OpenAIModel = OpenAIModel.gpt4):
+        openai.api_key = api_key
         self.model = model
 
-    @retry(openai.error.RateLimitError, tries=5, delay=5, backoff=1.5, max_delay=15)
+    @retry(RateLimitError, tries=5, delay=5, backoff=1.5, max_delay=15)
     def get_answer(self, user_prompt: str, system_prompt: str, max_tokens: int | None = None):
         messages = [
             {'role': 'system', 'content': system_prompt},

@@ -1,20 +1,17 @@
 import logging
 
 from bs4 import BeautifulSoup
-from utils import split_large_request
-from llm.chat import OpenAIModel, OpenAIChatModel
-from utils.compressor import compress_html
+from scraperai.utils import split_large_request
+from scraperai.llm.chat import OpenAIModel, OpenAIChatModel
+from scraperai.utils.compressor import compress_html
 
 
 logger = logging.getLogger(__file__)
 
 
 class PaginationDetection:
-    def __init__(self, chat_model: OpenAIChatModel = None):
-        if chat_model:
-            self.chat_model = chat_model
-        else:
-            self.chat_model = OpenAIChatModel(model=OpenAIModel.gpt4)
+    def __init__(self, chat_model: OpenAIChatModel):
+        self.chat_model = chat_model
 
     def find_pagination(self, html: str):
         """

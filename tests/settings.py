@@ -16,3 +16,13 @@ if os.path.exists(BASE_DIR / '.env'):
     load_dotenv(BASE_DIR / '.env')
 
 OPEN_AI_TOKEN = os.getenv('OPEN_AI_TOKEN')
+SELENOID_URL = os.getenv('SELENOID_URL')
+
+selenoid_capabilities = {
+    "browserName": "chrome",
+    "browserVersion": "119.0",
+    "selenoid:options": {
+        "enableVideo": False
+    },
+    "sessionTimeout": '2h'
+}

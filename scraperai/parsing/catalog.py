@@ -13,11 +13,8 @@ logger = logging.getLogger(__file__)
 
 
 class CatalogParser:
-    def __init__(self, chat_model: OpenAIChatModel = None):
-        if chat_model:
-            self.chat_model = chat_model
-        else:
-            self.chat_model = OpenAIChatModel(model=OpenAIModel.gpt4)
+    def __init__(self, chat_model: OpenAIChatModel):
+        self.chat_model = chat_model
 
     def to_table(self, html: str) -> pd.DataFrame | None:
         html, subs = compress_html(html)

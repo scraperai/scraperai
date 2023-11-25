@@ -7,15 +7,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-from scraperai.browser.base import BrowserScraper
-from scraperai.browser.storage import LocalStorage
-
-# Initializing a list with two Useragents
-with open(Path(__file__).resolve().parent / 'useragents.txt', 'r') as f:
-    useragentarray = list(f.read().split('\n'))
+from .base import BaseWebdriver
+from .storage import LocalStorage
+from .useragents import get_random_useragent
 
 
-class LocalBrowserScraper(BrowserScraper):
+class LocalWebdriver(webdriver.Chrome, BaseWebdriver):
     @staticmethod
     def _setup_options() -> Options:
         options = Options()
@@ -37,30 +34,20 @@ class LocalBrowserScraper(BrowserScraper):
         return options
 
     def __init__(self):
+        self.url = 'local'
         self.options = self._setup_options()
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=self.options)
-        self.local_storage = LocalStorage(self.driver)
+        super().__init__(service=Service(ChromeDriverManager().install()), options=self.options)
+        self.local_storage = LocalStorage(self)
 
         # Changing the property of the navigator value for webdriver to undefined
-        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        self.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     def get(self, url: str):
-        index = random.randint(0, len(useragentarray) - 1)
-        self.driver.execute_cdp_cmd("Network.setUserAgentOverride", {"userAgent": useragentarray[index]})
-        self.driver.get(url)
-
-    @property
-    def page_source(self) -> str:
-        return self.driver.page_source
+        self.execute_cdp_cmd("Network.setUserAgentOverride", {"userAgent": get_random_useragent()})
+        super().get(url)
 
     def wait(self, timeout: float, locator):
-        WebDriverWait(self.driver, timeout).until(locator)
+        WebDriverWait(self, timeout).until(locator)
 
     def set_storage(self, key, value):
         self.local_storage.set(key, value)
-
-    def execute_cdp_cmd(self, cmd: str, cmd_args: dict):
-        self.driver.execute_cdp_cmd(cmd, cmd_args)
-
-    def close(self):
-        self.driver.close()

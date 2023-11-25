@@ -3,7 +3,7 @@ htmlmin
 requests
 beautifulsoup4
 lxml
-selenium
+selenium==4.9.1
 webdriver-manager
 
 # ML

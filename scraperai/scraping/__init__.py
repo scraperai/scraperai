@@ -9,7 +9,7 @@ from lxml import etree
 from selenium.webdriver.common.by import By
 from tqdm import tqdm
 
-from scraperai.browser.local import LocalBrowserScraper
+from scraperai.webdriver.manager import WebdriversManager
 from scraperai.llm.chat import OpenAIChatModel, OpenAIModel
 from scraperai.parsing.pagination import PaginationDetection
 from scraperai.parsing.catalog import CatalogParser

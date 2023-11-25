@@ -1,7 +1,9 @@
 from abc import abstractmethod, ABC
 
 
-class BrowserScraper(ABC):
+class BaseWebdriver(ABC):
+    url: str
+
     def get(self, url: str):
         ...
 
@@ -23,5 +25,5 @@ class BrowserScraper(ABC):
         ...
 
     @abstractmethod
-    def close(self):
+    def quit(self):
         ...
