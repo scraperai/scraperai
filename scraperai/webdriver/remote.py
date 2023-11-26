@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import copy
 import typing as tp
 
 import json
@@ -15,6 +18,17 @@ class RemoteWebdriver(webdriver.Remote, BaseWebdriver):
         super().__init__(command_executor=url, desired_capabilities=capabilities)
         self.url = url
         self.local_storage = LocalStorage(self)
+
+    @staticmethod
+    def from_session_id(url: str, capabilities: dict[str, tp.Any], session_id: str) -> RemoteWebdriver:
+        driver = RemoteWebdriver(url, capabilities)
+        driver_copy = copy.copy(driver)
+        driver.quit()
+        driver_copy.session_id = session_id
+        return driver_copy
+
+    def get_session_id(self) -> str:
+        return self.session_id
 
     def get(self, url: str):
         self.execute_cdp_cmd("Network.setUserAgentOverride", {"userAgent": get_random_useragent()})

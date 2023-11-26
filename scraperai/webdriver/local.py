@@ -1,6 +1,3 @@
-import random
-from pathlib import Path
-
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
@@ -41,6 +38,9 @@ class LocalWebdriver(webdriver.Chrome, BaseWebdriver):
 
         # Changing the property of the navigator value for webdriver to undefined
         self.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+    def get_session_id(self) -> str:
+        return self.session_id
 
     def get(self, url: str):
         self.execute_cdp_cmd("Network.setUserAgentOverride", {"userAgent": get_random_useragent()})

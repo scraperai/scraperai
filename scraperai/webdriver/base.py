@@ -7,6 +7,10 @@ class BaseWebdriver(ABC):
     def get(self, url: str):
         ...
 
+    @abstractmethod
+    def get_session_id(self) -> str:
+        ...
+
     @property
     @abstractmethod
     def page_source(self) -> str:
