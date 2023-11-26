@@ -1,3 +1,5 @@
+import typing as tp
+
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
@@ -30,7 +32,8 @@ class LocalWebdriver(webdriver.Chrome, BaseWebdriver):
 
         return options
 
-    def __init__(self):
+    def __init__(self, on_quit: tp.Callable[[], None] = None):
+        self.on_quit = on_quit
         self.url = 'local'
         self.options = self._setup_options()
         super().__init__(service=Service(ChromeDriverManager().install()), options=self.options)
@@ -51,3 +54,8 @@ class LocalWebdriver(webdriver.Chrome, BaseWebdriver):
 
     def set_storage(self, key, value):
         self.local_storage.set(key, value)
+
+    def quit(self) -> None:
+        if self.on_quit:
+            self.on_quit()
+        super().quit()

@@ -17,17 +17,17 @@ class BaseWebdriver(ABC):
         ...
 
     @abstractmethod
-    def wait(self, timeout: float, locator):
+    def wait(self, timeout: float, locator) -> None:
         ...
 
     @abstractmethod
-    def set_storage(self, key, value):
+    def set_storage(self, key, value) -> None:
         ...
 
     @abstractmethod
-    def execute_cdp_cmd(self, cmd: str, cmd_args: dict):
+    def execute_cdp_cmd(self, cmd: str, cmd_args: dict) -> None:
         ...
 
     @abstractmethod
-    def quit(self):
+    def quit(self) -> None:
         ...

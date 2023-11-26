@@ -22,6 +22,7 @@ selenoid_capabilities = {
     "browserName": "chrome",
     "browserVersion": "119.0",
     "selenoid:options": {
+        "name": "working",
         "enableVideo": False
     },
     "sessionTimeout": '2h'

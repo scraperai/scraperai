@@ -12,7 +12,7 @@ class DetectionTests(unittest.TestCase):
         webmanager = WebdriversManager(selenoids=[
             SelenoidSettings(url=SELENOID_URL, max_sessions=1, capabilities=selenoid_capabilities)
         ])
-        driver = webmanager.start_driver()
+        driver = webmanager.create_driver()
         chat_model = OpenAIChatModel(api_key=OPEN_AI_TOKEN)
         detector = PaginationDetection(chat_model)
         pagination_test_urls = [
