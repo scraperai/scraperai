@@ -27,11 +27,21 @@ def fix_relative_url(base_url: str, url: str) -> str:
 
 
 class SimpleScrapingFlow:
-    def __init__(self):
-        chat_model = OpenAIChatModel(model=OpenAIModel.gpt4)
+    def __init__(self, api_key: str,
+                 model: OpenAIModel,
+                 webmanager: WebdriversManager,
+                 active_session_url: str = None,
+                 active_session_id: str = None):
+        chat_model = OpenAIChatModel(api_key, model)
         self.pagination_detector = PaginationDetection(chat_model=chat_model)
         self.catalog_parser = CatalogParser(chat_model=chat_model)
         self.details_parser = DetailsPageParser(chat_model=chat_model)
+        self.webmanager = webmanager
+
+        if active_session_id:
+            self.driver = self.webmanager.from_session_id(active_session_url, active_session_id)
+        else:
+            self.driver = self.webmanager.create_driver()
 
     def collect_all_data(self, start_url: str) -> pd.DataFrame:
         logger.info(f'Start parsing "{start_url}"')
@@ -39,19 +49,19 @@ class SimpleScrapingFlow:
         # Get catalog page
         components = urlparse(start_url)
         base_url = components.scheme + '://' + components.netloc + '/'
-        scraper = LocalBrowserScraper()
-        scraper.get(start_url)
+        self.driver.get(start_url)
         time.sleep(1)
 
         # Find pagination
-        pagination_xpath = self.pagination_detector.find_pagination(scraper.page_source)
+        pagination_xpath = self.pagination_detector.find_pagination(self.driver.page_source)
         if pagination_xpath:
             logger.info(f'Pagination xpath was found: "{pagination_xpath}"')
         else:
             logger.info('Pagination was not found')
 
         # Find urls selectors
-        classnames = self.catalog_parser.find_classnames(scraper.page_source, search_elements=['name', 'url'])
+        classnames = self.catalog_parser.find_classnames(self.driver.page_source,
+                                                         search_elements=['name', 'url'])
         url_classname = classnames['url']
         logger.info(f'Found url classname: "{url_classname}"')
 
@@ -59,12 +69,12 @@ class SimpleScrapingFlow:
         urls = set()
         page_number = 0
         while True:
-            soup = BeautifulSoup(scraper.page_source, 'html.parser')
+            soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             new_urls = [fix_relative_url(base_url, x['href']) for x in soup.find_all(class_=url_classname)]
             urls.update(new_urls)
             logger.info(f'Page: {page_number}: Found {len(new_urls)} new urls')
             try:
-                elem = scraper.driver.find_element(By.XPATH, pagination_xpath)
+                elem = self.driver.find_element(By.XPATH, pagination_xpath)
                 elem.click()
                 time.sleep(3)
             except Exception as e:
@@ -82,14 +92,14 @@ class SimpleScrapingFlow:
         items = []
         selectors = None
         for i in tqdm(range(len(urls))):
-            scraper.get(urls[i])
+            self.driver.get(urls[i])
             time.sleep(1)
             if selectors is None:
-                selectors = self.details_parser.to_selectors(scraper.page_source)
+                selectors = self.details_parser.to_selectors(self.driver.page_source)
                 if selectors is None:
                     return pd.DataFrame({'urls': urls})
 
-            soup = BeautifulSoup(scraper.page_source, 'html.parser')
+            soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             dom = etree.HTML(str(soup))
             data = {}
             for key, xpath in selectors.items():
