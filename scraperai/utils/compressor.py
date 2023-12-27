@@ -15,7 +15,9 @@ GOOD_ATTRS = {
 
 
 # Function to remove tags
-def compress_html(html, good_attrs: set = None, bad_tags: set = None):
+def compress_html(html, good_attrs: set = None,
+                  bad_tags: set = None,
+                  use_substituions: bool = True) -> tuple[str, dict[str, str]]:
     if good_attrs is None:
         good_attrs = GOOD_ATTRS
     if bad_tags is None:
@@ -40,11 +42,13 @@ def compress_html(html, good_attrs: set = None, bad_tags: set = None):
     # Substitute texts
     index = 0
     substituions = {}
-    for p in soup.find_all('p') + soup.find_all('cite'):
-        _id = f'my_text_{index}'
-        substituions[_id] = str(p.string)
-        p.string = _id
-        index += 1
+    if use_substituions:
+        for p in soup.find_all('p') + soup.find_all('cite'):
+            if len(str(p.string)) > 100:
+                _id = f'my_text_{index}'
+                substituions[_id] = str(p.string)
+                p.string = _id
+                index += 1
     # Remove empty tags
     for tag in soup.find_all():
         if tag.text.strip() == '':
@@ -58,6 +62,8 @@ def test():
     html = requests.get(url).content.decode('utf-8')
     with open('../research/files/test/compressed.html', 'w+') as f:
         f.write(html)
+
+    # req
 
 
 if __name__ == '__main__':

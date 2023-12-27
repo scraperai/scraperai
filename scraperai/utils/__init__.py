@@ -3,12 +3,12 @@ from io import StringIO
 import pandas as pd
 import tiktoken
 
-from scraperai.llm.chat import OpenAIModel
+from scraperai.llm.models import OpenAIModel
 
 models_max_tokens = {
-    OpenAIModel.gpt4: 8192,
-    OpenAIModel.gpt3: 4097,
-    OpenAIModel.gpt3_large: 16385
+    OpenAIModel.gpt4: 128000,
+    OpenAIModel.gpt3: 16385,
+    OpenAIModel.vision: 16385
 }
 
 

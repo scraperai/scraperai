@@ -23,7 +23,7 @@ class SelenoidSettings:
     url: str
     max_sessions: int
     capabilities: dict[str, tp.Any] = None
-    timeout: float = 10
+    timeout: float = 60
 
 
 class WebdriversManager:

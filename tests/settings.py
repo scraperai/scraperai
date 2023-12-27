@@ -22,8 +22,10 @@ selenoid_capabilities = {
     "browserName": "chrome",
     "browserVersion": "119.0",
     "selenoid:options": {
-        "name": "working",
-        "enableVideo": False
+        "name": "scraperai",
+        "enableVideo": False,
+        "enableVNC": True,
+        "screenResolution": "1280x1024x24",
+        "sessionTimeout": '5m'
     },
-    "sessionTimeout": '2h'
 }

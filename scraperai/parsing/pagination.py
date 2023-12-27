@@ -1,25 +1,27 @@
 import logging
+from typing import Callable
 
 from bs4 import BeautifulSoup
 from scraperai.utils import split_large_request
-from scraperai.llm.chat import OpenAIModel, OpenAIChatModel
+from scraperai.llm import OpenAIChatModel
 from scraperai.utils.compressor import compress_html
 
 
 logger = logging.getLogger(__file__)
 
 
-class PaginationDetection:
+class PaginationDetector:
     def __init__(self, chat_model: OpenAIChatModel):
         self.chat_model = chat_model
+        self.total_spent = 0.0
 
-    def find_pagination(self, html: str):
+    def find_xpath(self, html: str) -> str | None:
         """
         Tries to find xpath for pagination button
         :param html: webpage source
         :return: xpath to pagination button or None if not found
         """
-        chain_methods = [self._find_pagination_classname, self._find_pagination_name]
+        chain_methods: list[Callable[[str], str]] = [self._find_pagination_classname, self._find_pagination_name]
         for method in chain_methods:
             xpath = method(html)
             if xpath:
@@ -46,8 +48,9 @@ class PaginationDetection:
 
         classname = 'None'
         for payload in payloads:
-            text = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens=max_tokens)
-            print('Response', text)
+            response = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens=max_tokens)
+            self.total_spent += response.price
+            text = response.text
             if text != 'None':
                 classname = text
         if len(initial_soup.find_all(class_=classname)) == 1:
@@ -75,8 +78,9 @@ class PaginationDetection:
 
         result = 'None'
         for payload in payloads:
-            text = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens=max_tokens)
-
+            response = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens=max_tokens)
+            self.total_spent += response.price
+            text = response.text
             if text != 'None':
                 result = text
         if result == 'None' or len(result.split(',')) != 2:

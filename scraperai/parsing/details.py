@@ -4,10 +4,9 @@ import logging
 from bs4 import BeautifulSoup
 from lxml import etree
 
+from scraperai.llm import OpenAIChatModel
 from scraperai.utils import markdown_to_pandas, cut_large_request
-from scraperai.llm.chat import OpenAIModel, OpenAIChatModel
 from scraperai.utils.compressor import compress_html
-
 
 logger = logging.getLogger(__file__)
 
@@ -15,6 +14,7 @@ logger = logging.getLogger(__file__)
 class DetailsPageParser:
     def __init__(self, chat_model: OpenAIChatModel):
         self.chat_model = chat_model
+        self.total_spent = 0.0
 
     def to_table(self, html: str):
         compressed_html, subs = compress_html(html, good_attrs={'class'})
@@ -25,8 +25,9 @@ class DetailsPageParser:
                  f"Extract data and present it as a table with one row. The HTML: %s"
         max_tokens = 1000
         payload = cut_large_request(self.chat_model.model, system_prompt, prompt, compressed_html, max_tokens)
-        text = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens)
-        return markdown_to_pandas(text, subs)
+        response = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens=max_tokens)
+        self.total_spent += response.price
+        return markdown_to_pandas(response.text, subs)
 
     def to_selectors(self, html: str) -> dict[str, str] | None:
         """
@@ -51,10 +52,10 @@ class DetailsPageParser:
 
         max_tokens = 1000
         payload = cut_large_request(self.chat_model.model, system_prompt, prompt, compressed_html, max_tokens)
-        text = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens)
-
+        response = self.chat_model.get_answer(prompt % payload, system_prompt, max_tokens=max_tokens, force_json=True)
+        self.total_spent += response.price
         try:
-            data = json.loads(text)
+            data = json.loads(response.text)
             if not isinstance(data, dict):
                 raise TypeError
 
@@ -67,10 +68,10 @@ class DetailsPageParser:
                     del data[key]
 
             if errors_count > int(0.3 * total_keys):
-                raise Exception(f'Too many invalid xpaths. Response: {text}')
+                raise Exception(f'Too many invalid xpaths. Response: {response.text}')
 
             return data
         except Exception as e:
-            logger.error(f'Wrong response format: {text}')
+            logger.error(f'Wrong response format: {response.text}')
             logger.exception(e)
             return None

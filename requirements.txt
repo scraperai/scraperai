@@ -7,7 +7,7 @@ selenium==4.9.1
 webdriver-manager
 
 # ML
-openai
+openai==1.6.1
 tiktoken
 
 
@@ -18,3 +18,5 @@ pandas
 python-dotenv
 tqdm
 retry
+Pillow==10.1.0
+pydantic

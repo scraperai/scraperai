@@ -29,5 +29,13 @@ class BaseWebdriver(ABC):
         ...
 
     @abstractmethod
+    def execute_script(self, script, *args) -> None:
+        ...
+
+    @abstractmethod
+    def get_screenshot_as_base64(self) -> str:
+        ...
+
+    @abstractmethod
     def quit(self) -> None:
         ...

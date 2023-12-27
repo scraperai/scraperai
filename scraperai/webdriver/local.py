@@ -1,11 +1,13 @@
 import typing as tp
 
 from selenium import webdriver
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
+from .utils import highlight
 from .base import BaseWebdriver
 from .storage import LocalStorage
 from .useragents import get_random_useragent
@@ -59,3 +61,6 @@ class LocalWebdriver(webdriver.Chrome, BaseWebdriver):
         if self.on_quit:
             self.on_quit()
         super().quit()
+
+    def highlight(self, element: WebElement, color: str, border: int):
+        highlight(self, element, color, border)
