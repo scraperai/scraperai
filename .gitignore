@@ -2,10 +2,13 @@
 /core/.idea
 /backend/.idea
 /venv/
+/build
 
 /scraperai/research/
 /backend/db.sqlite3*
 
+
 *.rdb
 *.env*
 /scraperai.egg-info/
+/*.png

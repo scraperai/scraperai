@@ -22,5 +22,6 @@ setup(
     license='MIT License',
     packages=find_packages(),
     package_dir={'scraperai': 'scraperai'},
+    include_package_data=True,
     install_requires=requirements
 )
