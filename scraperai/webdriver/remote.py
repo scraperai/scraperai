@@ -8,7 +8,8 @@ import json
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 from .base import BaseWebdriver
 from .utils import highlight
@@ -16,13 +17,21 @@ from .storage import LocalStorage
 from .useragents import get_random_useragent
 
 
-def _make_options() -> Options:
-    options = Options()
-    options.add_argument("--window-size=1280, 1024")
+def _make_firefox_options() -> FirefoxOptions:
+    opts = FirefoxOptions()
+    opts.set_preference("general.useragent.override",
+                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36")
+    return opts
+
+
+def _make_chrome_options() -> ChromeOptions:
+    options = ChromeOptions()
+    options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36")
+    options.add_argument("--ignore-certificate-errors")
+
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-                         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36')
 
     # Anti bot
     # Adding argument to disable the AutomationControlled flag
@@ -37,7 +46,14 @@ def _make_options() -> Options:
 
 class RemoteWebdriver(webdriver.Remote, BaseWebdriver):
     def __init__(self, url: str, capabilities: dict[str, tp.Any]):
-        super().__init__(command_executor=url, desired_capabilities=capabilities, options=_make_options())
+        if capabilities['browserName'] == 'chrome':
+            capabilities.update(_make_chrome_options().to_capabilities())
+        elif capabilities['browserName'] == 'firefox':
+            capabilities.update(_make_firefox_options().to_capabilities())
+        else:
+            raise Exception('Invalid browser name')
+
+        super().__init__(command_executor=url, desired_capabilities=capabilities)
         self.url = url
         self.local_storage = LocalStorage(self)
 

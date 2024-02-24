@@ -7,6 +7,10 @@ from retry import retry
 
 from .models import ChatModelResponse, OpenAIModelPrices, OpenAIModel
 
+
+# Suppress openai logging
+logging.getLogger('openai').setLevel(logging.WARNING)
+logging.getLogger('httpx').setLevel(logging.WARNING)
 logger = logging.getLogger(__file__)
 
 

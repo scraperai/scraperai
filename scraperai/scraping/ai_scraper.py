@@ -72,6 +72,10 @@ class ScraperAI(BaseScraper):
         return self.driver.session_id
 
     @property
+    def session_url(self) -> str:
+        return self.driver.url
+
+    @property
     def vnc_url(self) -> str | None:
         if isinstance(self.driver, RemoteWebdriver):
             return f'ws://{urlparse(self.driver.url).netloc}/vnc/{self.session_id}'

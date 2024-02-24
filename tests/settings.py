@@ -19,8 +19,8 @@ OPEN_AI_TOKEN = os.getenv('OPEN_AI_TOKEN')
 SELENOID_URL = os.getenv('SELENOID_URL')
 
 selenoid_capabilities = {
-    "browserName": "chrome",
-    "browserVersion": "119.0",
+    "browserName": "firefox",
+    "browserVersion": "115.0",
     "selenoid:options": {
         "name": "scraperai",
         "enableVideo": False,

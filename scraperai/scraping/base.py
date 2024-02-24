@@ -31,6 +31,11 @@ class BaseScraper(ABC):
 
     @property
     @abstractmethod
+    def session_url(self) -> str:
+        ...
+
+    @property
+    @abstractmethod
     def vnc_url(self) -> str | None:
         ...
 

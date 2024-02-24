@@ -43,6 +43,10 @@ class MockedScraper(BaseScraper):
         return self.driver.session_id
 
     @property
+    def session_url(self) -> str:
+        return self.driver.url
+
+    @property
     def vnc_url(self) -> str | None:
         if isinstance(self.driver, RemoteWebdriver):
             return f'ws://{urlparse(self.driver.url).netloc}/vnc/{self.session_id}'
@@ -66,9 +70,11 @@ class MockedScraper(BaseScraper):
         self.current_url = url
 
     def detect_page_type(self, url: str) -> WebpageType:
+        self.navigate(url)
         return WebpageType.CATALOG
 
     def detect_pagination(self, url: str) -> str | None:
+        self.navigate(url)
         xpath = '/html/body/div/main/section[3]/div/div[2]/button'
         try:
             element = self.driver.find_element(By.XPATH, xpath)
@@ -79,9 +85,21 @@ class MockedScraper(BaseScraper):
         return xpath
 
     def detect_catalog_item(self, url: str) -> CatalogItem | None:
+        self.navigate(url)
+
+        classnames = {
+            'card': 'product',
+            'url': 'product_img'
+        }
+        element = self.driver.find_element(By.CLASS_NAME, classnames['card'])
+        self.driver.execute_script("arguments[0].scrollIntoView();", element)
+
+        for classname in classnames.values():
+            for element in self.driver.find_elements(By.CLASS_NAME, classname):
+                self.driver.highlight(element, 'red', 5)
         return CatalogItem(
-            card_classname='product',
-            url_classname='product_img',
+            card_classname=classnames['card'],
+            url_classname=classnames['url'],
             html_snippet='',
             url=''
         )
@@ -94,6 +112,8 @@ class MockedScraper(BaseScraper):
         }
 
     def detect_details_on_page(self, url: str) -> dict[str, str]:
+        url = 'https://xn--80akogvo.xn--k1abfdfi3ec.xn--p1ai/goods/view/293563'
+        self.navigate(url)
         return {
             'Название': '/html/body/div/main/div/div/div[2]/div/div[1]/div[1]/h1',
             'Артикул': '/html/body/div/main/div/div/div[2]/div/div[1]/div[4]/p',
@@ -107,10 +127,12 @@ class MockedScraper(BaseScraper):
                                         pagination_xpath: str,
                                         card_classname: str,
                                         selectors: dict[str, str]) -> pd.DataFrame:
+        self.navigate(start_url)
         base_dir = Path(__file__).resolve().parent
         return pd.read_excel(base_dir / 'mockdata.xlsx', header=0)
 
     def collect_urls_to_nested_pages(self, start_url: str, pagination_xpath: str, url_classname: str) -> list[str]:
+        self.navigate(start_url)
         return [
             'https://xn--80akogvo.xn--k1abfdfi3ec.xn--p1ai/goods/view/281600',
             'https://xn--80akogvo.xn--k1abfdfi3ec.xn--p1ai/goods/view/282880',

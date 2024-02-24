@@ -47,7 +47,7 @@ class WebdriversManager:
                                                          capabilities=selenoid.capabilities,
                                                          session_id=session_id)
                 return driver
-        raise KeyError('Session not found')
+        raise KeyError(f'Session not found for url="{url}" session_id="{session_id}"')
 
     def _on_local_quit(self):
         self.local_sessions -= 1
