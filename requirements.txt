@@ -7,7 +7,7 @@ selenium==4.9.1
 webdriver-manager
 
 # ML
-openai==1.6.1
+openai
 tiktoken
 
 

@@ -23,7 +23,8 @@ def encode_image_to_b64(image: bytes | str | Path) -> str:
 def compress_b64_image(b64_image: str, aspect_ratio: float = None, max_dimension: float = None) -> str:
     image_data = base64.b64decode(b64_image)
     image = Image.open(io.BytesIO(image_data))
-
+    file_path = 'image.png'
+    image.save(file_path)
     if aspect_ratio:
         new_size = (int(image.width * aspect_ratio), int(image.height * aspect_ratio))
     elif max_dimension:
@@ -35,10 +36,8 @@ def compress_b64_image(b64_image: str, aspect_ratio: float = None, max_dimension
         raise TypeError('Either aspect_ratio or max_dimension should be specified')
 
     resized_image = image.resize(new_size, Image.LANCZOS)
-
-    # file_path = 'image.png'
-    # resized_image.save(file_path)
-
+    file_path = 'image2.png'
+    resized_image.save(file_path)
     buffered = io.BytesIO()
     resized_image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()

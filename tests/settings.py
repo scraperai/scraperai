@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+from scraperai.crawlers.webdriver import SelenoidSettings, WebdriversManager
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -12,6 +13,7 @@ logging.basicConfig(
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / 'tests' / 'data'
 if os.path.exists(BASE_DIR / '.env'):
     load_dotenv(BASE_DIR / '.env')
 
@@ -25,7 +27,10 @@ selenoid_capabilities = {
         "name": "scraperai",
         "enableVideo": False,
         "enableVNC": True,
-        "screenResolution": "1280x1024x24",
+        # "screenResolution": "1280x1024x24",
         "sessionTimeout": '5m'
     },
 }
+default_webmanager = WebdriversManager(selenoids=[
+    SelenoidSettings(url=SELENOID_URL, max_sessions=50, capabilities=selenoid_capabilities)
+])
