@@ -16,6 +16,14 @@ class Pagination(BaseModel):
     xpath: Optional[str] = None
     url_param: Optional[str] = None
 
+    def __str__(self):
+        if self.type == 'scroll':
+            return f'Pagination using infinite scroll'
+        elif self.type == 'xpath':
+            return f'Pagination using button with xpath: {self.xpath}'
+        else:
+            return f'Pagination using url parameter "{self.url_param}"'
+
 
 class PaginationDetector:
     def __init__(self, model: BaseLM):

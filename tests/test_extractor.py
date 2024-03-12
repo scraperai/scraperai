@@ -11,7 +11,7 @@ openai_model = OpenAI(OPEN_AI_TOKEN)
 json_openai_model = JsonOpenAI(OPEN_AI_TOKEN)
 
 
-class ParsersTests(unittest.TestCase):
+class TextExtractors(unittest.TestCase):
     def test_static_fields_extractor(self):
         parser = DataFieldsExtractor(OpenAI(OPEN_AI_TOKEN, temperature=0))
         with open(BASE_DIR / 'tests' / 'data' / 'ozon_card.html', 'r') as f:

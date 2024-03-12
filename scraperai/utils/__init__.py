@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import tiktoken
 
 
@@ -15,3 +17,11 @@ def cut_large_request(system_prompt: str,
     if fixed_size + payload_size >= max_tokens:
         return cut_large_request(system_prompt, prompt[0: int(len(prompt) * step)], max_tokens, response_tokens, step)
     return prompt
+
+
+def fix_relative_url(base_url: str, url: str) -> str:
+    components = urlparse(base_url)
+    base_url = components.scheme + '://' + components.netloc + '/'
+    if url.startswith('http'):
+        return url
+    return base_url + url.lstrip('/')

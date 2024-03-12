@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal, Optional, Any
 from pydantic import BaseModel
 
 
@@ -7,12 +7,14 @@ class StaticField(BaseModel):
     field_xpath: str
     field_type: Literal['single', 'array'] = 'single'
     iterator_xpath: Optional[str] = None
+    first_value: Optional[Any] = None
 
 
 class DynamicField(BaseModel):
     section_name: str
     name_xpath: str
     value_xpath: str
+    first_values: Optional[dict[str, str]] = None
 
 
 class WebpageFields(BaseModel):
@@ -21,7 +23,7 @@ class WebpageFields(BaseModel):
 
 
 class CatalogItem(BaseModel):
-    card_classname: str
-    url_classname: str
+    card_xpath: str
+    url_xpath: str
     html_snippet: str
-    url: str
+    urls_on_page: list[str]

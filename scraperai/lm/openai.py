@@ -25,6 +25,7 @@ class OpenAI(BaseLM):
                                openai_organization=openai_organization,
                                max_retries=3,
                                **kwargs)
+        self.total_cost = 0
 
     def invoke(self, user_prompt: str, system_prompt: str, **kwargs) -> str:
         messages = [
@@ -37,6 +38,7 @@ class OpenAI(BaseLM):
         ]
         with get_openai_callback() as cb:
             r = self.chat.invoke(messages).content
+            self.total_cost += cb.total_cost
             logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.3f}")
         r = r.strip('```').strip('\n').strip()
         return r
@@ -61,6 +63,7 @@ class JsonOpenAI(BaseJsonLM):
         self.model_with_structure = None
         if schema:
             self.model_with_structure = self.chat.with_structured_output(schema, method='json_mode')
+        self.total_cost = 0
 
     def invoke(self, user_prompt: str, system_prompt: str, **kwargs) -> _DictOrPydanticClass:
         messages = [
@@ -77,5 +80,6 @@ class JsonOpenAI(BaseJsonLM):
             else:
                 text = self.chat.invoke(messages).content
                 r = json.loads(text)
+            self.total_cost += cb.total_cost
             logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.3f}")
         return r

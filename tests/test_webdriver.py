@@ -5,7 +5,7 @@ from scraperai.crawlers.webdriver.manager import TooManySessions
 from .settings import selenoid_capabilities, SELENOID_URL
 
 
-class WebdriversTests(unittest.TestCase):
+class TestWebdrivers(unittest.TestCase):
     test_url = 'https://apple.com'
     test_substr = '<link rel="canonical" href="https://www.apple.com/">'
 

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import htmlmin
 import tiktoken
@@ -155,9 +156,23 @@ def remove_nodes_by_xpath(html_content: str, xpaths: list[str]) -> str:
 
 def get_node_text(node) -> str:
     if isinstance(node, str):
-        return node
+        text = node
     else:
-        return etree.tostring(node, method="text", encoding='unicode')
+        text = etree.tostring(node, method="text", encoding='unicode')
+    text = text.strip()
+    return text
+
+
+def extract_field_by_xpath(tree, xpath: str) -> Any:
+    nodes = tree.xpath(xpath)
+    nodes = [get_node_text(node) for node in nodes]
+    if len(nodes) == 0:
+        value = None
+    elif len(nodes) == 1:
+        value = nodes[0]
+    else:
+        value = nodes
+    return value
 
 
 def extract_dynamic_fields_by_xpath(labels_xpath: str,

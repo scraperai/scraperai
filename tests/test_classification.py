@@ -6,7 +6,7 @@ from scraperai.vision.openai import VisionOpenAI
 from .settings import default_webmanager, OPEN_AI_TOKEN
 
 
-class ClassificationTests(unittest.TestCase):
+class TestClassification(unittest.TestCase):
     def test_classification(self):
         driver = default_webmanager.create_driver()
         crawler = SeleniumCrawler(driver)

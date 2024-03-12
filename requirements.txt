@@ -9,10 +9,12 @@ webdriver-manager
 # ML
 openai
 tiktoken
-
+langchain
 
 # Data
 pandas
+openpyxl
+tabulate
 
 # Others
 python-dotenv
@@ -20,3 +22,4 @@ tqdm
 retry
 Pillow==10.1.0
 pydantic
+click

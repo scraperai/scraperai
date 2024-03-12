@@ -14,13 +14,17 @@ class SeleniumCrawler(BaseCrawler):
         else:
             self.driver = driver
         self.current_url = None
-        self.driver.set_window_size(1000, 2000)
+        self.ready = False
 
     def get(self, url: str):
         if self.current_url == url:
             return
         self.driver.get(url)
         time.sleep(1)
+        if not self.ready:
+            # self.driver.set_window_size(1000, 2000)
+            self.driver.execute_script("document.body.style.zoom='60%'")
+            self.ready = True
         self.current_url = url
 
     @property

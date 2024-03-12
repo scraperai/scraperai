@@ -1,9 +1,8 @@
 import logging
 import time
-from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
 from pydantic import BaseModel
+from lxml import html
 
 from scraperai.crawlers import BaseCrawler, SeleniumCrawler
 from scraperai.lm.base import BaseLM
@@ -16,21 +15,16 @@ from scraperai.parsers import (
     WebpageTextClassifier,
     WebpagePartsDescriptor,
     WebpageVisionDescriptor,
-    CatalogItemDetector
+    CatalogItemDetector, DataFieldsExtractor
 )
 from scraperai.parsers.models import WebpageFields, CatalogItem
 from scraperai.parsers.utils import extract_fields_from_html, extract_items
+from scraperai.utils import fix_relative_url
 from scraperai.utils.image import compress_b64_image
 from scraperai.vision.base import BaseVision
 from scraperai.vision.openai import VisionOpenAI
 
 logger = logging.getLogger(__file__)
-
-
-def fix_relative_url(base_url: str, url: str) -> str:
-    if url.startswith('http'):
-        return url
-    return base_url + url.lstrip('/')
 
 
 class ScrapingTask(BaseModel):
@@ -49,25 +43,36 @@ class ScraperAI:
                  vision_model: BaseVision = None,
                  openai_api_key: str = None,
                  openai_organization: str = None):
-        if self.crawler is None:
+        if crawler is None:
             self.crawler = SeleniumCrawler()
         else:
             self.crawler = crawler
 
-        if self.lm_model is None:
+        if lm_model is None:
             self.lm_model = OpenAI(openai_api_key, openai_organization, temperature=0)
         else:
             self.lm_model = lm_model
 
-        if self.json_lm_model is None:
+        if json_lm_model is None:
             self.json_lm_model = JsonOpenAI(openai_api_key, openai_organization, temperature=0)
         else:
             self.json_lm_model = json_lm_model
 
-        if self.vision_model is None:
+        if vision_model is None:
             self.vision_model = VisionOpenAI(openai_api_key, openai_organization, temperature=0)
         else:
             self.vision_model = vision_model
+
+    @property
+    def total_cost(self) -> float:
+        cost = 0.0
+        if isinstance(self.lm_model, OpenAI):
+            cost += self.lm_model.total_cost
+        if isinstance(self.json_lm_model, JsonOpenAI):
+            cost += self.json_lm_model.total_cost
+        if isinstance(self.vision_model, VisionOpenAI):
+            cost += self.vision_model.total_cost
+        return cost
 
     def detect_page_type(self, url: str) -> WebpageType:
         self.crawler.get(url)
@@ -87,30 +92,24 @@ class ScraperAI:
         pagination = PaginationDetector(model=self.lm_model).find_pagination(html_content)
         return pagination
 
-    def detect_catalog_item(self, url: str) -> CatalogItem | None:
-        """
-
-        :param url:
-        :return: {
-            "card": "catalog card's classname",
-            "url": "classname of element containing href url",
-        }
-        """
+    def detect_catalog_item(self, url: str, extra_prompt: str = None) -> CatalogItem | None:
         self.crawler.get(url)
         html_content = self.crawler.page_source
-        classnames = CatalogItemDetector(model=self.json_lm_model).find_classnames(html_content)
-        if not classnames:
-            return None
+        detector = CatalogItemDetector(model=self.json_lm_model)
+        item = detector.detect_catalog_item(html_content, extra_prompt)
+        item.urls_on_page = [fix_relative_url(url, u) for u in item.urls_on_page]
+        return item
 
-        return CatalogItem(
-            card_classname=classnames['card'],
-            url_classname=classnames['url'],
-            html_snippet='',
-            url=''
-        )
+    def manually_change_catalog_item(self, url: str, card_xpath: str, url_xpath: str):
+        self.crawler.get(url)
+        html_content = self.crawler.page_source
+        detector = CatalogItemDetector(model=self.json_lm_model)
+        item = detector.manually_change_catalog_item(html_content, card_xpath, url_xpath)
+        item.urls_on_page = [fix_relative_url(url, u) for u in item.urls_on_page]
+        return item
 
     def extract_fields(self, html_snippet: str) -> WebpageFields:
-        return self.extract_fields(html_snippet)
+        return DataFieldsExtractor(model=self.lm_model).extract_fields(html_snippet)
 
     def summarize_details_page_as_valid_html(self, url: str) -> str:
         self.crawler.get(url)
@@ -150,7 +149,9 @@ class ScraperAI:
                                         start_url: str,
                                         pagination: Pagination,
                                         catalog_item_xpath: str,
-                                        fields: WebpageFields) -> list[dict]:
+                                        fields: WebpageFields,
+                                        max_pages: int,
+                                        max_rows: int) -> list[dict]:
         all_items = []
         page_number = 0
         self.crawler.get(start_url)
@@ -164,7 +165,7 @@ class ScraperAI:
                 break
 
             page_number += 1
-            if page_number >= 3:  # TODO: Remove this
+            if page_number >= max_pages or len(all_items) >= max_rows:
                 break
 
         logger.info(f'Totally found {len(all_items)} cards')
@@ -173,17 +174,14 @@ class ScraperAI:
     def collect_urls_to_nested_pages(self,
                                      start_url: str,
                                      pagination: Pagination,
-                                     url_classname: str,
+                                     url_xpath: str,
                                      max_pages: int = 3) -> list[str]:
-        components = urlparse(start_url)
-        base_url = components.scheme + '://' + components.netloc + '/'
-
         urls = set()
         page_number = 0
         self.crawler.get(start_url)
         while True:
-            soup = BeautifulSoup(self.crawler.page_source, 'html.parser')
-            new_urls = [fix_relative_url(base_url, x['href']) for x in soup.find_all(class_=url_classname)]
+            tree = html.fromstring(self.crawler.page_source)
+            new_urls = [fix_relative_url(start_url, url) for url in tree.xpath(url_xpath)]
             urls.update(new_urls)
             logger.info(f'Page: {page_number}: Found {len(new_urls)} new urls')
             success = self._switch_page(pagination)
