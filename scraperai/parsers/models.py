@@ -21,6 +21,10 @@ class WebpageFields(BaseModel):
     static_fields: list[StaticField]
     dynamic_fields: list[DynamicField]
 
+    @property
+    def is_empty(self) -> bool:
+        return len(self.static_fields) == 0 and len(self.dynamic_fields) == 0
+
 
 class CatalogItem(BaseModel):
     card_xpath: str

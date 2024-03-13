@@ -10,6 +10,9 @@ webdriver-manager
 openai
 tiktoken
 langchain
+langchain_community
+langchain_openai
+langchain_text_splitters
 
 # Data
 pandas
@@ -20,6 +23,6 @@ tabulate
 python-dotenv
 tqdm
 retry
-Pillow==10.1.0
+Pillow
 pydantic
 click

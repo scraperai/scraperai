@@ -15,7 +15,7 @@ BAD_TAGS = {
     'script', 'style', 'meta', 'noscript', 'footer', 'header'
 }
 GOOD_ATTRS = {
-    'class', "id", "name", 'href', 'text',
+    'class', 'id', 'name', 'href', 'text', 'src'
 }
 
 

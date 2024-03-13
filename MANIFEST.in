@@ -1,2 +1,1 @@
-include scraperai/webdriver/useragents.txt
-include scraperai/scraping/mockdata.xlsx
+include scraperai/crawlers/webdriver/useragents.txt

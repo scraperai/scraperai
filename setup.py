@@ -13,15 +13,20 @@ requirements = [line for line in REQUIREMENTS_DIR.read_text().split('\n') if lin
 setup(
     name='scraperai',
     version='0.0.1',
-    description='Auto-parsing library for Python',
-    url='https://github.com/iakov-kaiumov/scraperai',
+    description='AI scraping util',
+    url='https://github.com/scraperai/scraperai',
     author='Iakov Kaiumov',
-    author_email='kaiumov.iag@phystech.edu',
+    author_email='help@scraper-ai.com',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    license='MIT License',
+    license='GPL-3.0 license',
     packages=find_packages(),
     package_dir={'scraperai': 'scraperai'},
     include_package_data=True,
-    install_requires=requirements
+    install_requires=requirements,
+    entry_points={
+        'console_scripts': [
+            'scraperai = scraperai.cli:main',
+        ],
+    },
 )

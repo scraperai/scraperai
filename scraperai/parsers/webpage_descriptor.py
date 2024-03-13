@@ -118,9 +118,9 @@ Descriptions data:
 
 
 def test_vision():
-    from tests.settings import BASE_DIR, OPEN_AI_TOKEN
+    from tests.settings import BASE_DIR, OPENAI_API_KEY
     from scraperai.vision.openai import VisionOpenAI
-    descriptor = WebpageVisionDescriptor(VisionOpenAI(OPEN_AI_TOKEN))
+    descriptor = WebpageVisionDescriptor(VisionOpenAI(OPENAI_API_KEY))
     with open(BASE_DIR / 'tests' / 'data' / 'ozon_detail_page.html', 'r') as f:
         html_content = f.read()
 
@@ -130,9 +130,9 @@ def test_vision():
 
 
 def test():
-    from tests.settings import BASE_DIR, OPEN_AI_TOKEN
+    from tests.settings import BASE_DIR, OPENAI_API_KEY
     from scraperai.lm.openai import JsonOpenAI
-    descriptor = WebpagePartsDescriptor(JsonOpenAI(OPEN_AI_TOKEN, temperature=0))
+    descriptor = WebpagePartsDescriptor(JsonOpenAI(OPENAI_API_KEY, temperature=0))
     with open(BASE_DIR / 'tests' / 'data' / 'ozon_detail_page.html', 'r') as f:
         html_content = f.read()
 

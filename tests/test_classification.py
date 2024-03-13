@@ -3,14 +3,14 @@ from scraperai.parsers import WebpageType, WebpageVisionClassifier
 from scraperai.crawlers import SeleniumCrawler
 from scraperai.utils.image import compress_b64_image
 from scraperai.vision.openai import VisionOpenAI
-from .settings import default_webmanager, OPEN_AI_TOKEN
+from .settings import default_webmanager, OPENAI_API_KEY
 
 
 class TestClassification(unittest.TestCase):
     def test_classification(self):
         driver = default_webmanager.create_driver()
         crawler = SeleniumCrawler(driver)
-        classifier = WebpageVisionClassifier(model=VisionOpenAI(OPEN_AI_TOKEN))
+        classifier = WebpageVisionClassifier(model=VisionOpenAI(OPENAI_API_KEY))
         test_urls = [
             ('https://xn--80akogvo.xn--k1abfdfi3ec.xn--p1ai/market/craft/1', WebpageType.CATALOG),
             ('https://xn--80akogvo.xn--k1abfdfi3ec.xn--p1ai/goods/view/287096', WebpageType.DETAILS),

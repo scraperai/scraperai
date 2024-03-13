@@ -135,8 +135,8 @@ class App:
 
         if nested_page_url is not None:
             click.echo(f'Loading nested page and detecting data fields...')
-            new_html = self.scraper.summarize_details_page_as_valid_html(nested_page_url)
-            fields = self.scraper.extract_fields(new_html)
+            html_snippet = self.scraper.summarize_details_page_as_valid_html(nested_page_url)
+            fields = self.scraper.extract_fields(html_snippet)
         elif html_snippet is not None:
             click.echo(f'Detecting data fields...')
             fields = self.scraper.extract_fields(html_snippet)
@@ -151,19 +151,26 @@ class App:
             action_type = click.prompt('Do you want to remove or add field?',
                                        type=click.Choice(['add', 'remove'], case_sensitive=False))
             if action_type == 'add':
-                # TODO: Add
-                click.echo('Not implemented!')
+                user_description = click.prompt('Enter description of the field(s)')
+                click.echo('Searching...')
+                new_fields = self.scraper.find_fields(html_snippet, user_description)
+                if new_fields.is_empty:
+                    click.echo(f'Nothing found:(')
+                else:
+                    fields.static_fields += new_fields.static_fields
+                    fields.dynamic_fields += new_fields.dynamic_fields
+                    self._print_fields(fields)
             else:
                 field_name = click.prompt('Enter field name or index')
                 deleted = False
-                static_fields_len = len(fields.static_fields)
+                offset_index = len(fields.static_fields)
                 for i in range(len(fields.static_fields)):
                     if fields.static_fields[i].field_name == field_name or str(i) == field_name:
                         del fields.static_fields[i]
                         deleted = True
                         break
                 for i in range(len(fields.dynamic_fields)):
-                    curr_index = str(i + static_fields_len)
+                    curr_index = str(i + offset_index)
                     if fields.dynamic_fields[i].section_name == field_name or curr_index == field_name:
                         del fields.dynamic_fields[i]
                         deleted = True
@@ -181,20 +188,22 @@ class App:
         self.max_rows = click.prompt('Enter rows limit', type=int, default=50)
 
     def show_scraping_formula(self):
+        if self.catalog_item:
+            catalog_item = f'(card_xpath={self.catalog_item.card_xpath}, url_xpath={self.catalog_item.url_xpath})'
+        else:
+            catalog_item = "-"
         click.echo(f'\n'
                    f'Parsing summary:\n'
                    f' - Start url: {self.start_url}'
                    f' - Start page type: {self.page_type}\n'
-                   f' - Pagination: {self.pagination}\n'
-                   f' - Catalog item: (card_xpath={self.catalog_item.card_xpath}, url_xpath={self.catalog_item.url_xpath})'
+                   f' - Pagination: {self.pagination or "-"}\n'
+                   f' - Catalog item: {catalog_item}\n'
                    f' - Open nested pages: {self.open_nested_pages}\n'
                    f' - Fields: {len(self.fields.static_fields)} static, {len(self.fields.dynamic_fields)} dynamic\n'
                    f' - Max pages: {self.max_pages}\n'
                    f' - Max rows: {self.max_rows}\n'
                    f' - Total OpenAI cost, $: {self.scraper.total_cost:.3f}\n')
-        if not click.confirm('Press enter to start scraping', default=True):
-            # TODO:
-            pass
+        click.confirm('Press enter to start scraping', default=True)
 
     def scrape(self):
         click.echo('Starting scraping...')
@@ -252,6 +261,32 @@ class App:
                 break
         click.echo('Thank you for using ScraperAI!')
 
+    def run(self):
+        # Step 3: Detect page type
+        page_type = self.detect_page_type()
+
+        if page_type == WebpageType.OTHER:
+            self.quit('Unsupported page type. Aborting...')
+        elif page_type == WebpageType.CATALOG:
+            # Step 4: Detect pagination
+            self.detect_pagination()
+            # Step 5: Detect catalog item
+            catalog_item = self.detect_catalog_item()
+            # Step 6: Detect fields
+            open_nested_pages = self.ask_if_open_nested_pages()
+            if open_nested_pages:
+                self.detect_fields(nested_page_url=catalog_item.urls_on_page[0])
+            else:
+                self.detect_fields(html_snippet=catalog_item.html_snippet)
+            self.ask_for_max_pages_and_items()
+        elif page_type == WebpageType.DETAILS:
+            self.detect_fields(nested_page_url=self.start_url)
+
+        # Step 8: Scraping all pages accroding to the task
+        self.show_scraping_formula()
+        self.scrape()
+        self.export_results()
+
     def quit(self, message: str = None):
         if message:
             click.echo(message)
@@ -259,55 +294,33 @@ class App:
         exit(0)
 
 
-@click.group()
-def main():
-    """Simple CLI application using Click"""
-    pass
+@click.command()
+@click.option('--url', prompt='Enter url', help='url of the catalog or product page of any website')
+def main(url: str):
+    """ScraperAI CLI Application
+    
+    You need openai api key to use this application. There are two ways to pass the key. 
+    The first is to add OPENAI_API_KEY to your environment or create .env file.
+    Second option is to pass api key to the script (you will be asked).
+    """
 
-
-@main.command()
-@click.option('--url', prompt='Enter url', help='Start url of the catalog page of any website')
-def parse(url: str):
     # Step 1: Get openai token
     env_file = find_dotenv()
-    openai_api_key = None
     if env_file:
         load_dotenv()
-        openai_api_key = os.getenv('OPEN_AI_TOKEN')
-        if openai_api_key is None:
-            click.echo('OPEN_AI_TOKEN was not found in .env')
-    else:
-        click.echo('.env was not found')
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if openai_api_key is None:
+        click.echo('OPENAI_API_KEY was not found in .env')
     if openai_api_key is None:
         openai_api_key = click.prompt('Enter your openai token')
 
     # Step 2: Init crawler and scraper
     app = App(openai_api_key, url)
-
-    # Step 3: Detect page type
-    page_type = app.detect_page_type()
-
-    if page_type == WebpageType.OTHER:
-        app.quit('Unsupported page type. Aborting...')
-    elif page_type == WebpageType.CATALOG:
-        # Step 4: Detect pagination
-        app.detect_pagination()
-        # Step 5: Detect catalog item
-        catalog_item = app.detect_catalog_item()
-        # Step 6: Detect fields
-        open_nested_pages = app.ask_if_open_nested_pages()
-        if open_nested_pages:
-            app.detect_fields(nested_page_url=catalog_item.urls_on_page[0])
-        else:
-            app.detect_fields(html_snippet=catalog_item.html_snippet)
-        app.ask_for_max_pages_and_items()
-    elif page_type == WebpageType.DETAILS:
-        app.detect_fields(nested_page_url=url)
-
-    # Step 8: Scraping all pages accroding to the task
-    app.show_scraping_formula()
-    app.scrape()
-    app.export_results()
+    try:
+        app.run()
+    except Exception as e:
+        click.echo(f'Unexpected exception: {e}')
+        raise e
     app.quit()
 
 

@@ -20,7 +20,7 @@ class DataFieldsExtractor:
         html_snippet, _ = minify_html(html_content, use_substituions=False)
 
         system_prompt = "You are an HTML parser. Your primary goal is to find fields with data."
-        prompt = """
+        prompt = f"""
 You are an HTML parser. You will be given an HTML snippet that contains information about one element. 
 This element can be a product, service, project or something else.
 
@@ -35,8 +35,10 @@ Please, extract only static sections in CSV format. You need to mention:
 
 If nothing found return just one row if columns names.
 Use comma , as csv separator.
-The HTML: %s
-""" % html_snippet
+{context or ''}
+The HTML:
+{html_snippet}
+"""
 
         response = self.model.invoke(prompt, system_prompt)
         df = pd.read_csv(io.StringIO(response), header=0, delimiter=',', index_col=False).replace(np.nan, None)
@@ -81,8 +83,9 @@ If nothing found return just one row if columns names.
 XPATHs should start with ".//".
 Use comma , as csv separator. Do not add any extra symbols.
 {context or ''}
-The HTML: %s
-""" % html_snippet
+The HTML:
+{html_snippet}
+"""
 
         response = self.model.invoke(prompt, system_prompt)
         df = pd.read_csv(io.StringIO(response), header=0, delimiter=',', index_col=False).replace(np.nan, None)
@@ -100,7 +103,7 @@ The HTML: %s
                 )
                 for _, row in df.iterrows()
             ]
-        except KeyError as e:
+        except Exception as e:
             print(response)
             print(df)
             raise e
@@ -114,11 +117,18 @@ The HTML: %s
         )
         return WebpageFields(static_fields=static_fields, dynamic_fields=dynamic_fields)
 
+    def find_fields(self, html_snippet: str, user_description: str) -> WebpageFields:
+        static_fields = self.extract_static_fields(html_snippet, user_description)
+        if static_fields:
+            return WebpageFields(static_fields=static_fields, dynamic_fields=[])
+        dynamic_fields = self.extract_dynamic_fields(html_snippet, user_description)
+        return WebpageFields(static_fields=[], dynamic_fields=dynamic_fields)
+
 
 def test():
-    from tests.settings import BASE_DIR, OPEN_AI_TOKEN
+    from tests.settings import BASE_DIR, OPENAI_API_KEY
     from scraperai.lm.openai import OpenAI
-    parser = DataFieldsExtractor(OpenAI(OPEN_AI_TOKEN, temperature=0))
+    parser = DataFieldsExtractor(OpenAI(OPENAI_API_KEY, temperature=0))
 
     with open(BASE_DIR / 'tests' / 'data' / 'ozon_card.html', 'r') as f:
         html_content = f.read()

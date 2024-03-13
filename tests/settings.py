@@ -17,7 +17,7 @@ DATA_DIR = BASE_DIR / 'tests' / 'data'
 if os.path.exists(BASE_DIR / '.env'):
     load_dotenv(BASE_DIR / '.env')
 
-OPEN_AI_TOKEN = os.getenv('OPEN_AI_TOKEN')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 SELENOID_URL = os.getenv('SELENOID_URL')
 
 selenoid_capabilities = {
