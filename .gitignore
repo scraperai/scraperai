@@ -3,6 +3,7 @@
 /backend/.idea
 /venv/
 /build
+/dist
 
 /scraperai/research/
 /backend/db.sqlite3*
