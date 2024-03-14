@@ -1,28 +1,14 @@
 import logging
-from typing import Callable, Literal, Optional
+from typing import Callable
 
-from pydantic import BaseModel
 from bs4 import BeautifulSoup
 from scraperai.lm.base import BaseLM
+from scraperai.parsers.models import Pagination
 from scraperai.utils.html import minify_html
 from langchain_text_splitters import TokenTextSplitter
 
 
 logger = logging.getLogger(__file__)
-
-
-class Pagination(BaseModel):
-    type: Literal['xpath', 'scroll', 'url_param']
-    xpath: Optional[str] = None
-    url_param: Optional[str] = None
-
-    def __str__(self):
-        if self.type == 'scroll':
-            return f'Pagination using infinite scroll'
-        elif self.type == 'xpath':
-            return f'Pagination using button with xpath: {self.xpath}'
-        else:
-            return f'Pagination using url parameter "{self.url_param}"'
 
 
 class PaginationDetector:

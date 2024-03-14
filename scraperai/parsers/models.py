@@ -31,3 +31,17 @@ class CatalogItem(BaseModel):
     url_xpath: str
     html_snippet: str
     urls_on_page: list[str]
+
+
+class Pagination(BaseModel):
+    type: Literal['xpath', 'scroll', 'url_param']
+    xpath: Optional[str] = None
+    url_param: Optional[str] = None
+
+    def __str__(self):
+        if self.type == 'scroll':
+            return f'Pagination using infinite scroll'
+        elif self.type == 'xpath':
+            return f'Pagination using button with xpath: {self.xpath}'
+        else:
+            return f'Pagination using url parameter "{self.url_param}"'
