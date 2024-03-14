@@ -78,7 +78,7 @@ Extract dynamic sections data fields in CSV format. You need to mention:
 2. name_xpath - xpath relative to section to extract ALL names or labels of fields
 3. value_xpath - xpath relative to section to extract ALL values of fields
 
-First row must be columns names: section_name, name_xpath, value_xpath. 
+First row must be columns names: section_name; name_xpath; value_xpath
 If nothing found return just one row if columns names.
 XPATHs should start with ".//".
 Use semicolon ; as csv separator. Do not add any extra symbols.
