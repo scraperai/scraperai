@@ -26,7 +26,7 @@ setup(
     install_requires=requirements,
     entry_points={
         'console_scripts': [
-            'scraperai = scraperai.cli:main',
+            'scraperai = scraperai.cli.app:main',
         ],
     },
 )

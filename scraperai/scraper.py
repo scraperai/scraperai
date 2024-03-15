@@ -1,6 +1,8 @@
 import logging
 import time
+from typing import Optional, Generator, Iterable
 
+import selenium
 from pydantic import BaseModel
 from lxml import html
 
@@ -25,12 +27,16 @@ from scraperai.utils.image import compress_b64_image
 logger = logging.getLogger(__file__)
 
 
-class ScrapingTask(BaseModel):
+class ScrapingSummary(BaseModel):
     start_url: str
-    pagination: Pagination
-    catalog_item: CatalogItem
+    page_type: WebpageType
+    pagination: Optional[Pagination]
+    catalog_item: Optional[CatalogItem]
     open_nested_pages: bool
     fields: WebpageFields
+    max_pages: int
+    max_rows: int
+    total_cost: Optional[float]
 
 
 class ScraperAI:
@@ -138,6 +144,8 @@ class ScraperAI:
                 self.crawler.click(pagination.xpath)
                 time.sleep(3)
                 return True
+            except selenium.common.exceptions.ElementClickInterceptedException as e:
+                logger.exception(e)
             except Exception as e:
                 logger.exception(e)
                 return False
@@ -148,19 +156,20 @@ class ScraperAI:
         else:
             raise ValueError
 
-    def collect_data_from_catalog_pages(self,
-                                        start_url: str,
-                                        pagination: Pagination,
-                                        catalog_item_xpath: str,
-                                        fields: WebpageFields,
-                                        max_pages: int,
-                                        max_rows: int) -> list[dict]:
-        all_items = []
+    def iter_data_from_catalog_pages(self,
+                                     start_url: str,
+                                     pagination: Pagination,
+                                     catalog_item_xpath: str,
+                                     fields: WebpageFields,
+                                     max_pages: int,
+                                     max_rows: int) -> Generator[list[dict], None, None]:
+        total_count = 0
         page_number = 0
         self.crawler.get(start_url)
         while True:
             items = extract_items(self.crawler.page_source, fields, catalog_item_xpath)
-            all_items += items
+            total_count += len(items)
+            yield items
             logger.info(f'Page: {page_number}: Found {len(items)} new cards')
 
             success = self._switch_page(pagination)
@@ -168,40 +177,33 @@ class ScraperAI:
                 break
 
             page_number += 1
-            if page_number >= max_pages or len(all_items) >= max_rows:
+            if page_number >= max_pages or total_count >= max_rows:
                 break
 
-        logger.info(f'Totally found {len(all_items)} cards')
-        return all_items
-
-    def collect_urls_to_nested_pages(self,
-                                     start_url: str,
-                                     pagination: Pagination,
-                                     url_xpath: str,
-                                     max_pages: int = 3) -> list[str]:
-        urls = set()
+    def iter_urls_to_nested_pages(self,
+                                  start_url: str,
+                                  pagination: Pagination,
+                                  url_xpath: str,
+                                  max_pages: int = 3) -> Generator[list[str], None, None]:
         page_number = 0
         self.crawler.get(start_url)
         while True:
             tree = html.fromstring(self.crawler.page_source)
             new_urls = [fix_relative_url(start_url, url) for url in tree.xpath(url_xpath)]
-            urls.update(new_urls)
             logger.info(f'Page: {page_number}: Found {len(new_urls)} new urls')
+            yield new_urls
+
             success = self._switch_page(pagination)
             if not success:
                 break
             page_number += 1
-            if page_number >= max_pages:  # TODO: Remove this
+            if page_number >= max_pages:
                 break
 
-        logger.info(f'Totally found {len(urls)} urls')
-        return list(urls)
-
-    def collect_data_from_nested_pages(self, urls: list[str], fields: WebpageFields) -> list[dict]:
-        urls = urls[0:10]  # TODO: Remove this
-        items = []
-        for url in urls:
+    def iter_data_from_nested_pages(self,
+                                    urls: Iterable[str],
+                                    fields: WebpageFields,
+                                    max_rows: int = 1000) -> Generator[dict, None, None]:
+        for url in list(urls)[:max_rows]:
             self.crawler.get(url)
-            data = extract_fields_from_html(self.crawler.page_source, fields)
-            items.append(data)
-        return items
+            yield extract_fields_from_html(self.crawler.page_source, fields)
