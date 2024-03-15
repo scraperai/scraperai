@@ -7,7 +7,7 @@ from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from scraperai.lm.base import BaseLM, BaseJsonLM, _DictOrList, _DictOrPydanticClass, BaseVision
+from scraperai.lm.base import BaseLM, BaseJsonLM, _Dict, _DictOrPydanticClass, BaseVision
 
 logger = logging.getLogger(__file__)
 
@@ -57,7 +57,7 @@ class JsonOpenAI(BaseJsonLM):
             self.model_with_structure = self.chat.with_structured_output(schema, method='json_mode')
         self.total_cost = 0
 
-    def invoke(self, messages: list[BaseMessage]) -> _DictOrList:
+    def invoke(self, messages: list[BaseMessage]) -> _Dict:
         with get_openai_callback() as cb:
             if self.model_with_structure:
                 response = self.model_with_structure.invoke(messages)

@@ -1,25 +1,25 @@
 import unittest
 
 from scraperai.parsers import DataFieldsExtractor
-from scraperai.lm.openai import OpenAI, JsonOpenAI
+from scraperai.lm.openai import JsonOpenAI
 from scraperai.utils import html
 from .settings import OPENAI_API_KEY, DATA_DIR
 
 
-openai_model = OpenAI(OPENAI_API_KEY)
-json_openai_model = JsonOpenAI(OPENAI_API_KEY)
+json_openai_model = JsonOpenAI(OPENAI_API_KEY, temperature=0)
 
 
 class TextExtractors(unittest.TestCase):
     def test_static_fields_extractor(self):
-        parser = DataFieldsExtractor(OpenAI(OPENAI_API_KEY, temperature=0))
+        parser = DataFieldsExtractor(json_openai_model)
         with open(DATA_DIR / 'ozon_card.html', 'r') as f:
             html_content = f.read()
         static_fields = parser.extract_static_fields(html_content)
-        print(static_fields)
+        for f in static_fields:
+            print(f)
 
     def test_dynamic_fields_extractor(self):
-        parser = DataFieldsExtractor(OpenAI(OPENAI_API_KEY, temperature=0))
+        parser = DataFieldsExtractor(json_openai_model)
 
         with open(DATA_DIR / 'ozon_card.html', 'r') as f:
             html_content = f.read()

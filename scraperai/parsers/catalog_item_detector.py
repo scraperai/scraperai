@@ -75,7 +75,7 @@ If you have not found any relevant data return:
                        f'because the number of elements the select are different: {cards_count} != {urls_count}'
             return None
 
-        data: dict[str, str] = self.query_with_validation(messages, _validate_catalog_item, max_retries=3)
+        data: dict[str, str] = self.query_with_validation(messages, _validate_catalog_item, max_retries=2)
         card_xpath = data['card']
         url_xpath = data['url']
         if card_xpath is None or url_xpath is None:

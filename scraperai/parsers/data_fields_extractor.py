@@ -1,21 +1,29 @@
-import io
 import logging
+from typing import Optional
 
-import numpy as np
-import pandas as pd
 from langchain_core.messages import SystemMessage, HumanMessage
 from lxml import html
+from pydantic import BaseModel, ValidationError
 
-from scraperai.lm.base import BaseLM
+from scraperai.lm.base import BaseJsonLM
 from scraperai.parsers.agent import ChatModelAgent
 from scraperai.parsers.models import StaticField, WebpageFields, DynamicField
+from scraperai.parsers.utils import build_validation_error_message
 from scraperai.utils.html import minify_html, extract_field_by_xpath, extract_dynamic_fields_by_xpath
 
 logger = logging.getLogger(__file__)
 
 
+class StaticFieldResponseModel(BaseModel):
+    fields: list[StaticField]
+
+
+class DynamicFieldResponseModel(BaseModel):
+    fields: list[DynamicField]
+
+
 class DataFieldsExtractor(ChatModelAgent):
-    def __init__(self, model: BaseLM):
+    def __init__(self, model: BaseJsonLM):
         super().__init__(model)
         self.model = model
 
@@ -30,13 +38,15 @@ There are two types of data fields in HTML snippets. First type is static field 
 It can be both single values and arrays.
 Second type is dynamic sections where there are both field names and values mentioned.
 
-Extract static data fields.
-Please, extract only static sections in CSV format. You need to mention: 
-1. "field_name": guessed by you, Human Readable 
-2. "field_xpath" : xpath to field value
-
-If nothing found return just one row if columns names.
-Use semicolon ; as csv separator."""
+Extract static data fields and present results as JSON with the following structure:
+```
+{
+    "fields": [
+        {"field_name": "guessed by you, Human Readable", "field_xpath": "xpath to field value"},
+    ]
+}
+```
+If nothing found return empty array"""
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=html_snippet),
@@ -44,28 +54,28 @@ Use semicolon ; as csv separator."""
         if context:
             messages.append(HumanMessage(content=context))
 
-        response = self.model.invoke(messages)
-        df = pd.read_csv(io.StringIO(response), header=0, delimiter=';', index_col=False).replace(np.nan, None)
         tree = html.fragment_fromstring(html_snippet, create_parent=True)
-        fields = []
-        for _, row in df.iterrows():
-            xpath = row['field_xpath']
+
+        def extract_fields_from_response(json_data: dict) -> list[StaticField]:
+            model = StaticFieldResponseModel(**json_data)
+            for i in range(len(model.fields)):
+                mod_xpath = '.' + model.fields[i].field_xpath.lstrip('.')
+                model.fields[i].first_value = extract_field_by_xpath(tree, mod_xpath)
+            return model.fields
+
+        def _validate_response(json_data: dict) -> Optional[str]:
             try:
-                first_value = extract_field_by_xpath(tree, '.' + xpath.lstrip('.'))
-            except Exception as e:
-                print(f'Error when extracting first_value: {e}')
-                print(f"xpath={xpath} xpath2={'.' + xpath.lstrip('.')}")
-                first_value = None
-            fields.append(StaticField(
-                field_name=row['field_name'],
-                field_xpath=row['field_xpath'],
-                first_value=first_value
-            ))
-        return fields
+                extract_fields_from_response(json_data)
+            except ValidationError as exc:
+                return build_validation_error_message(exc)
+            return None
+
+        response = self.query_with_validation(messages, _validate_response)
+        return extract_fields_from_response(response)
 
     def extract_dynamic_fields(self, html_content: str, context: str = None) -> list[DynamicField]:
         html_snippet, _ = minify_html(html_content, use_substituions=False)
-        system_prompt = f"""
+        system_prompt = """
 You are an HTML parser. You will be given an HTML snippet that contains information about one element. 
 This element can be a product, service, project or something else.
 
@@ -73,15 +83,20 @@ There are two types of data fields in HTML snippets. First type is static field 
 Second type is dynamic sections where there are both field names and values mentioned. 
 It is very important that dynamic section includes fields with both NAME and VALUE specified.
 
-Extract dynamic sections data fields in CSV format. You need to mention: 
-1. section_name: guessed by you, Human Readable 
-2. name_xpath - xpath relative to section to extract ALL names or labels of fields
-3. value_xpath - xpath relative to section to extract ALL values of fields
-
-First row must be columns names: section_name; name_xpath; value_xpath
-If nothing found return just one row if columns names.
+Extract dynamic sections data fields in JSON format:
+```
+{
+    "fields": [
+        {
+            "section_name": "guessed by you, Human Readable", 
+            "name_xpath": "xpath relative to section to extract ALL names or labels of fields",
+            "value_xpath": "xpath relative to section to extract ALL values of fields"
+        },
+    ]
+}
+```
+If nothing found return empty array.
 XPATHs should start with ".//".
-Use semicolon ; as csv separator. Do not add any extra symbols.
 """
 
         messages = [
@@ -91,26 +106,29 @@ Use semicolon ; as csv separator. Do not add any extra symbols.
         if context:
             messages.append(HumanMessage(content=context))
 
-        response = self.model.invoke(messages)
-        df = pd.read_csv(io.StringIO(response), header=0, delimiter=';', index_col=False).replace(np.nan, None)
-        try:
-            return [
-                DynamicField(
-                    section_name=row['section_name'].strip(),
-                    name_xpath=row['name_xpath'],
-                    value_xpath=row['value_xpath'],
-                    first_values=extract_dynamic_fields_by_xpath(
-                        row['name_xpath'],
-                        row['value_xpath'],
-                        html_content=html_snippet
-                    )
+        tree = html.fromstring(html_content)
+
+        def extract_fields_from_response(json_data: dict) -> list[DynamicField]:
+            model = DynamicFieldResponseModel(**json_data)
+            for i in range(len(model.fields)):
+                model.fields[i].first_values = extract_dynamic_fields_by_xpath(
+                    model.fields[i].name_xpath,
+                    model.fields[i].value_xpath,
+                    tree=tree
                 )
-                for _, row in df.iterrows()
-            ]
-        except Exception as e:
-            print(response)
-            print(df)
-            raise e
+            return model.fields
+
+        def _validate_response(json_data: dict) -> Optional[str]:
+            try:
+                extract_fields_from_response(json_data)
+            except ValidationError as exc:
+                return build_validation_error_message(exc)
+            except ValueError as exc:
+                return exc.__str__()
+            return None
+
+        data = self.query_with_validation(messages, _validate_response)
+        return extract_fields_from_response(data)
 
     def extract_fields(self, html_snippet: str) -> WebpageFields:
         static_fields = self.extract_static_fields(html_snippet)
@@ -127,20 +145,3 @@ Use semicolon ; as csv separator. Do not add any extra symbols.
             return WebpageFields(static_fields=static_fields, dynamic_fields=[])
         dynamic_fields = self.extract_dynamic_fields(html_snippet, user_description)
         return WebpageFields(static_fields=[], dynamic_fields=dynamic_fields)
-
-
-def test():
-    from tests.settings import BASE_DIR, OPENAI_API_KEY
-    from scraperai.lm.openai import OpenAI
-    parser = DataFieldsExtractor(OpenAI(OPENAI_API_KEY, temperature=0))
-
-    with open(BASE_DIR / 'tests' / 'data' / 'ozon_card.html', 'r') as f:
-        html_content = f.read()
-    # Static fields
-    result = parser.extract_static_fields(html_content)
-    for el in result:
-        print(el)
-
-
-if __name__ == '__main__':
-    test()

@@ -175,8 +175,8 @@ def extract_field_by_xpath(tree, xpath: str) -> Any:
     return value
 
 
-def extract_dynamic_fields_by_xpath(labels_xpath: str,
-                                    values_xpath: str,
+def extract_dynamic_fields_by_xpath(name_xpath: str,
+                                    value_xpath: str,
                                     *,
                                     html_content: str = None,
                                     tree=None) -> dict[str, str]:
@@ -184,9 +184,10 @@ def extract_dynamic_fields_by_xpath(labels_xpath: str,
         tree = html.fromstring(html_content)
     elif tree is None:
         raise ValueError('One of `html_content` or `tree` should not be None')
-    labels = list(tree.xpath(labels_xpath))
-    values = list(tree.xpath(values_xpath))
+    labels = list(tree.xpath(name_xpath))
+    values = list(tree.xpath(value_xpath))
     if len(labels) != len(values):
-        raise ValueError(f'Labels and values are of different size: {len(labels)} != {len(values)}')
+        raise ValueError(f'Labels and values are of different size ({len(labels)} != {len(values)}) '
+                         f'for name_xpath={name_xpath} value_xpath={value_xpath}')
     return {get_node_text(key).strip(): get_node_text(value).strip() for key, value in zip(labels, values)}
 

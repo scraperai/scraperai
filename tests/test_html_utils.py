@@ -11,8 +11,8 @@ class TestHtmlUtils(unittest.TestCase):
         with open(DATA_DIR / 'ozon_card.html', 'r') as f:
             html_content = f.read()
         test_output = extract_dynamic_fields_by_xpath(
-            labels_xpath=".//div[@class='b8a i3t']/span/font/preceding-sibling::text()[1]",
-            values_xpath=".//div[@class='b8a i3t']/span/font",
+            name_xpath=".//div[@class='b8a i3t']/span/font/preceding-sibling::text()[1]",
+            value_xpath=".//div[@class='b8a i3t']/span/font",
             html_content=html_content
         )
         correct_output = {
@@ -52,7 +52,7 @@ class TestHtmlUtils(unittest.TestCase):
         correct_output = {
             "Sale Tag": "РАСПРОДАЖА",
             "Product Name": "Наушники беспроводные, bluetooth наушники, tws наушники, беспроводные наушники с микрофоном, беспроводные наушники",
-            "Rating": "4.7  ",
+            "Rating": "4.7",
             "Number of Reviews": "178 отзывов",
             "Current Price": "1 299 ₽",
             "Original Price": "14 990 ₽",

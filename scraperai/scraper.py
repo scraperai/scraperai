@@ -5,8 +5,8 @@ from pydantic import BaseModel
 from lxml import html
 
 from scraperai.crawlers import BaseCrawler, SeleniumCrawler
-from scraperai.lm.base import BaseLM
-from scraperai.lm.openai import OpenAI, JsonOpenAI
+from scraperai.lm.base import BaseLM, BaseVision
+from scraperai.lm.openai import OpenAI, JsonOpenAI, VisionOpenAI
 from scraperai.parsers import (
     PaginationDetector,
     Pagination,
@@ -21,8 +21,6 @@ from scraperai.parsers.models import WebpageFields, CatalogItem
 from scraperai.parsers.utils import extract_fields_from_html, extract_items
 from scraperai.utils import fix_relative_url
 from scraperai.utils.image import compress_b64_image
-from scraperai.vision.base import BaseVision
-from scraperai.vision.openai import VisionOpenAI
 
 logger = logging.getLogger(__file__)
 

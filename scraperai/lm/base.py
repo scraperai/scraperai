@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Union, Dict, Any, Type, TypeVar, List
+from typing import Union, Dict, Any, Type, TypeVar
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
 
 _BM = TypeVar("_BM", bound=BaseModel)
-_DictOrList = Dict[str, Any] | List[Any]
-_DictOrPydanticClass = Union[_DictOrList, Type[_BM]]
+_Dict = Dict[str, Any]
+_DictOrPydanticClass = Union[_Dict, Type[_BM]]
 
 
 class BaseLM(ABC):
@@ -17,7 +17,7 @@ class BaseLM(ABC):
 
 class BaseJsonLM(ABC):
     @abstractmethod
-    def invoke(self, messages: list[BaseMessage]) -> _DictOrList:
+    def invoke(self, messages: list[BaseMessage]) -> _Dict:
         ...
 
 

@@ -5,8 +5,6 @@ from pydantic import BaseModel
 class StaticField(BaseModel):
     field_name: str
     field_xpath: str
-    field_type: Literal['single', 'array'] = 'single'
-    iterator_xpath: Optional[str] = None
     first_value: Optional[Any] = None
 
 
