@@ -37,7 +37,7 @@ This element can be a product, service, project or something else.
 There are two types of data fields in HTML snippets. First type is static field that do not contain field name.
 It can be both single values and arrays.
 Second type is dynamic sections where there are both field names and values mentioned.
-
+Use relevant XPATH that selects nodes by classname, id or some other attribute.
 Extract static data fields and present results as JSON with the following structure:
 ```
 {
