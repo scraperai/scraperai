@@ -1,9 +1,8 @@
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.remote.webdriver import WebDriver
 
-from .base import BaseWebdriver
 
-
-def highlight(driver: BaseWebdriver, element: WebElement, color: str, border: int):
+def highlight(driver: WebDriver, element: WebElement, color: str, border: int):
     """Highlights (blinks) a Selenium Webdriver element"""
 
     def apply_style(s):

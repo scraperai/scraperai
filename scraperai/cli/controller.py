@@ -66,7 +66,7 @@ class Controller:
 
     def detect_page_type(self):
         self.view.show_page_type_screen(status=ScreenStatus.loading)
-        page_type = WebpageType.CATALOG# self.scraper.detect_page_type(self.start_url)
+        page_type = self.scraper.detect_page_type(self.start_url)
         self.view.show_page_type_screen(status=ScreenStatus.show, page_type=page_type)
 
         page_type = self.view.show_page_type_screen(status=ScreenStatus.edit, page_type=page_type)
@@ -87,6 +87,11 @@ class Controller:
             except NotFoundError:
                 catalog_item = None
         self.view.show_card_screen(status=ScreenStatus.show, catalog_item=catalog_item)
+        # Highlight cards
+        if catalog_item and isinstance(self.crawler, SeleniumCrawler):
+            self.crawler.highlight_by_xpath(catalog_item.card_xpath, '#8981D7', 5)
+            self.crawler.highlight_by_xpath(catalog_item.url_xpath, '#5499D1', 3)
+
         edit_form = self.view.show_card_screen(status=ScreenStatus.edit, catalog_item=catalog_item)
         if edit_form.has_changes:
             if edit_form.user_suggestion:
@@ -108,6 +113,19 @@ class Controller:
         self.catalog_item = catalog_item
         return catalog_item
 
+    def _highlight_fields(self, fields: WebpageFields):
+        if not isinstance(self.crawler, SeleniumCrawler):
+            return
+
+        colors = ['#539878', '#5499D1', '#549B9A', '#5982A3', '#5A5499', '#68D5A2', '#75DDDC', '#8981D7', '#98D1FF',
+                  '#98FFCF', '#9D5A5A', '#A05789', '#AAFFFE', '#C6C1FF', '#CD7CB3', '#D17A79', '#FAB4E4', '#FFB1B0']
+        for index, field in enumerate(fields.static_fields):
+            self.crawler.highlight_by_xpath(field.field_xpath, colors[index % len(colors)], border=4)
+        for index, field in enumerate(fields.dynamic_fields):
+            color = colors[index % len(colors)]
+            self.crawler.highlight_by_xpath(field.value_xpath, color, border=3)
+            self.crawler.highlight_by_xpath(field.name_xpath, color, border=3)
+
     def detect_fields(self, *, nested_page_url: str = None, html_snippet: str = None):
         self.view.show_fields_screen(status=ScreenStatus.loading)
         if nested_page_url is not None:
@@ -118,7 +136,7 @@ class Controller:
         else:
             raise ValueError
         self.view.show_fields_screen(status=ScreenStatus.show, fields=fields)
-
+        self._highlight_fields(fields)
         while True:
             edit_form = self.view.show_fields_screen(status=ScreenStatus.edit, fields=fields)
             if not edit_form.has_changes:
@@ -133,6 +151,7 @@ class Controller:
                     fields.static_fields += new_fields.static_fields
                     fields.dynamic_fields += new_fields.dynamic_fields
                     self.view.show_fields_screen(status=ScreenStatus.show, fields=fields)
+                    self._highlight_fields(fields)
             else:
                 field_name = edit_form.field_to_delete
                 deleted = False
@@ -150,6 +169,7 @@ class Controller:
                         break
                 if deleted:
                     self.view.show_fields_screen(status=ScreenStatus.show, fields=fields)
+                    self._highlight_fields(fields)
                 else:
                     self.view.show_fields_screen(status=ScreenStatus.show, not_found_message='No such field')
 
