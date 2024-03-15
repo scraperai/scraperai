@@ -107,12 +107,12 @@ class ScraperAI:
         return item
 
     def extract_fields(self, html_snippet: str) -> WebpageFields:
-        return DataFieldsExtractor(model=self.lm_model).extract_fields(html_snippet)
+        return DataFieldsExtractor(model=self.json_lm_model).extract_fields(html_snippet)
 
     def find_fields(self, html_snippet: str, user_description: str) -> WebpageFields:
         context = f"IMPORTANT! Search for fields that are described in " \
                   f"the following very important instructions: {user_description}"
-        return DataFieldsExtractor(model=self.lm_model).find_fields(html_snippet, context)
+        return DataFieldsExtractor(model=self.json_lm_model).find_fields(html_snippet, context)
 
     def summarize_details_page_as_valid_html(self, url: str) -> str:
         self.crawler.get(url)
