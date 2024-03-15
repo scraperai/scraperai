@@ -1,9 +1,16 @@
 from typing import Any
 
 from lxml import html, etree
+from pydantic import ValidationError
 
 from scraperai.parsers.models import WebpageFields, StaticField
 from scraperai.utils.html import extract_dynamic_fields_by_xpath, extract_field_by_xpath
+
+
+def build_validation_error_message(exc: ValidationError) -> str:
+    errors_texts = [f'{e["msg"]} for field {e["loc"]} ' for e in exc.errors()]
+    msg = 'Validation error!\n' + '\n'.join(errors_texts)
+    return msg
 
 
 def _prepare_xpath(xpath: str, select_context_node: bool) -> str:

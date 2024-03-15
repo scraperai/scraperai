@@ -64,7 +64,7 @@ Array of texts:
 %s
 ```
 """ % formtted_parts
-        response = self.model.invoke_as_json(user_prompt, system_prompt)
+        response = self.model.invoke(user_prompt, system_prompt)
         new_parts = []
         for part in parts:
             new_parts.append(DescribedHtmlPart(
@@ -100,7 +100,7 @@ Descriptions data:
 ```
 %s
 ```""" % formtted_parts
-        response = self.model.invoke_as_json(user_prompt, system_prompt)
+        response = self.model.invoke(user_prompt, system_prompt)
         relevant_xpaths = set(response['relevant_xpaths'])
         for part in parts:
             if part.xpath in relevant_xpaths:

@@ -1,30 +1,40 @@
 import logging
+from typing import Any, Optional
 
 from langchain.prompts import PromptTemplate
 from langchain_text_splitters import TokenTextSplitter
 from lxml import html, etree
+from pydantic import BaseModel, ValidationError
 
+from scraperai.exceptions import NotFoundError
 from scraperai.lm.base import BaseJsonLM
+from scraperai.parsers.agent import ChatModelAgent
 from scraperai.parsers.models import CatalogItem
+from scraperai.parsers.utils import build_validation_error_message
 from scraperai.utils.html import minify_html
 
 logger = logging.getLogger(__file__)
 
 
-class CatalogItemDetector:
+class CatalogItemResponseModel(BaseModel):
+    card: Optional[str]
+    url: Optional[str]
+
+
+class CatalogItemDetector(ChatModelAgent):
     def __init__(self, model: BaseJsonLM):
+        super().__init__(model)
         self.model = model
         self.max_chunk_size = 32000
 
-    def detect_catalog_item(self, html_content: str, extra_prompt: str = None) -> CatalogItem | None:
+    def detect_catalog_item(self, html_content: str, extra_prompt: str = None) -> CatalogItem:
         compressed_html, subs = minify_html(html_content, good_attrs={'class', 'href'})
+        tree = html.fromstring(compressed_html)
 
-        system_prompt = """
+        system_prompt = PromptTemplate.from_template("""
 You are an HTML parser. You will be given an HTML page with a catalog.
-Your primary goal is to find classname of these elements."""
-
-        prompt_template = PromptTemplate.from_template("""
-This HTML contains a catalog of projects. Each element includes name, image, url.
+Your primary goal is to find classname of these elements.
+The HTML contains a catalog of projects. Each element includes name, image, url.
 Your primary goal is to find xpath selectors of the catalog elements.
 It is better to use xpath with classname.
 The output should be a JSON dictionary like this:
@@ -41,24 +51,34 @@ If you have not found any relevant data return:
     "url": null
 }}
 ```
-{extra_prompt}
-The HTML: {html}""")
-        payload = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(compressed_html)[0]
-        prompt = prompt_template.format(extra_prompt=extra_prompt or '', html=payload)
-        data = self.model.invoke_as_json(prompt, system_prompt)
-        if data['card'] is None:
+{extra_prompt}""")
+        html_splitted = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(compressed_html)[0]
+        system_prompt = system_prompt.format(extra_prompt=extra_prompt or '')
+
+        def _validate_catalog_item(response: Any) -> Optional[str]:
+            # Validate schema
+            try:
+                model = CatalogItemResponseModel(**response)
+            except ValidationError as exc:
+                return build_validation_error_message(exc)
+            if model.card is None or model.url is None:
+                return None
+            # Validate xpath
+            cards_count = len(tree.xpath(model.card))
+            urls_count = len(tree.xpath(model.url))
+            if cards_count != urls_count:
+                return f'Card xpath: "{model.card}" and url xpath: "{model.url}" are bad ' \
+                       f'because the number of elements the select are different: {cards_count} != {urls_count}'
             return None
 
+        data: dict[str, str] = self.query_with_validation(html_splitted,
+                                                          system_prompt,
+                                                          _validate_catalog_item,
+                                                          max_retries=3)
         card_xpath = data['card']
         url_xpath = data['url']
-        tree = html.fromstring(compressed_html)
-
-        # counts = {}
-        # for key, xpath in data.items():
-        #     counts[key] = len(xpath)
-        # if len(set(counts.values())) != 1:
-        #     logger.info(f'Bad counts: {counts}')
-        #     return None
+        if card_xpath is None or url_xpath is None:
+            raise NotFoundError
 
         html_snippet = etree.tostring(tree.xpath(card_xpath)[0],
                                       pretty_print=True,

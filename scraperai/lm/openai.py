@@ -5,8 +5,9 @@ from typing import Optional
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel
 
-from scraperai.lm.base import BaseLM, BaseJsonLM, _DictOrPydanticClass
+from scraperai.lm.base import BaseLM, BaseJsonLM, _DictOrList, _DictOrPydanticClass
 
 
 logger = logging.getLogger(__file__)
@@ -65,7 +66,7 @@ class JsonOpenAI(BaseJsonLM):
             self.model_with_structure = self.chat.with_structured_output(schema, method='json_mode')
         self.total_cost = 0
 
-    def invoke(self, user_prompt: str, system_prompt: str, **kwargs) -> _DictOrPydanticClass:
+    def invoke(self, user_prompt: str, system_prompt: str, **kwargs) -> _DictOrList:
         messages = [
             SystemMessage(
                 content=system_prompt
@@ -76,10 +77,14 @@ class JsonOpenAI(BaseJsonLM):
         ]
         with get_openai_callback() as cb:
             if self.model_with_structure:
-                r = self.model_with_structure.invoke(messages)
+                response = self.model_with_structure.invoke(messages)
             else:
                 text = self.chat.invoke(messages).content
-                r = json.loads(text)
+                response = json.loads(text)
             self.total_cost += cb.total_cost
             logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.3f}")
-        return r
+
+        if isinstance(response, BaseModel):
+            return response.model_dump()
+        else:
+            return response

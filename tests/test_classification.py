@@ -21,6 +21,7 @@ class TestClassification(unittest.TestCase):
             screenshot = crawler.get_screenshot_as_base64()
             screenshot = compress_b64_image(screenshot, aspect_ratio=0.5)
             test_page_type = classifier.classify(screenshot)
+            print(test_page_type)
             self.assertEqual(page_type, test_page_type)
         driver.quit()
 

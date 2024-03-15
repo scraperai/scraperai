@@ -6,14 +6,16 @@ import pandas as pd
 from lxml import html
 
 from scraperai.lm.base import BaseLM
+from scraperai.parsers.agent import ChatModelAgent
 from scraperai.parsers.models import StaticField, WebpageFields, DynamicField
 from scraperai.utils.html import minify_html, extract_field_by_xpath, extract_dynamic_fields_by_xpath
 
 logger = logging.getLogger(__file__)
 
 
-class DataFieldsExtractor:
+class DataFieldsExtractor(ChatModelAgent):
     def __init__(self, model: BaseLM):
+        super().__init__(model)
         self.model = model
 
     def extract_static_fields(self, html_content: str, context: str = None) -> list[StaticField]:
@@ -55,8 +57,6 @@ The HTML:
             fields.append(StaticField(
                 field_name=row['field_name'],
                 field_xpath=row['field_xpath'],
-                # field_type=re.sub('[^A-Za-z0-9]+', '', row['field_type']),
-                # iterator_xpath=row['iterator_xpath'],
                 first_value=first_value
             ))
         return fields

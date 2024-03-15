@@ -3,6 +3,7 @@ from typing import Callable
 
 from bs4 import BeautifulSoup
 from scraperai.lm.base import BaseLM
+from scraperai.parsers.agent import ChatModelAgent
 from scraperai.parsers.models import Pagination
 from scraperai.utils.html import minify_html
 from langchain_text_splitters import TokenTextSplitter
@@ -11,8 +12,9 @@ from langchain_text_splitters import TokenTextSplitter
 logger = logging.getLogger(__file__)
 
 
-class PaginationDetector:
+class PaginationDetector(ChatModelAgent):
     def __init__(self, model: BaseLM):
+        super().__init__(model)
         self.model = model
         self.max_chunk_size = 24000
 
