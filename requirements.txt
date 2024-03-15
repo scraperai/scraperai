@@ -15,6 +15,7 @@ langchain_openai
 langchain_text_splitters
 
 # Data
+numpy
 pandas
 openpyxl
 tabulate

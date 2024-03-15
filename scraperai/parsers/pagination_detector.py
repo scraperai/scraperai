@@ -2,6 +2,8 @@ import logging
 from typing import Callable
 
 from bs4 import BeautifulSoup
+from langchain_core.messages import SystemMessage, HumanMessage
+
 from scraperai.lm.base import BaseLM
 from scraperai.parsers.agent import ChatModelAgent
 from scraperai.parsers.models import Pagination
@@ -50,19 +52,20 @@ class PaginationDetector(ChatModelAgent):
         initial_soup = BeautifulSoup(html, features='lxml')
         html, subs = minify_html(html, good_attrs={'class'})
 
-        system_prompt = """You are an HTML parser. Your primary goal is to find pagination on the web page."""
-        prompt = f"""
-This HTML contains a list of elements and button to show more elements.
-Text of the button can be "More", "Load more", "Еще", "Показать еще", "Дальше", "Следующая страница". 
+        system_prompt = """You are an HTML parser. Your primary goal is to find pagination on the web page.
+This HTML contains a list of elements and button to show more elements or to switch page.
+Text of the button can be "More", "Load more", "Next", "Next page" and any other.
 Your goal is to find classname of this button.
-Return classname if found or "None" instead, no other words. 
-The HTML: %s
-"""
+Return classname if found or "None" instead, no other words. """
 
-        payloads = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
+        html_parts = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
         classname = 'None'
-        for payload in reversed(payloads):
-            text = self.model.invoke(prompt % payload, system_prompt)
+        for html_part in reversed(html_parts):
+            messages = [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=html_part)
+            ]
+            text = self.model.invoke(messages)
             if text != 'None':
                 classname = text
         if len(initial_soup.find_all(class_=classname)) == 1:
@@ -78,19 +81,20 @@ The HTML: %s
         initial_soup = BeautifulSoup(html, features='lxml')
         html, subs = minify_html(html, good_attrs={'class'})
 
-        system_prompt = """You are an HTML parser. Your primary goal is to find pagination on the web page."""
-        prompt = """
+        system_prompt = """You are an HTML parser. Your primary goal is to find pagination on the web page.
 This HTML contains a list of elements and button to show more elements.
 Text of the button can be "More", "Load more", "Показать еще", 
 "Еще", "Дальше", "Следующая страница". Your goal is to find text and tag of this button.
-Return button text and tag in a form "text,tag" if found or "None" instead, no other words.
-The HTML: %s 
-"""
+Return button text and tag in a form "text,tag" if found or "None" instead, no other words."""
 
-        payloads = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
+        html_parts = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
         result = 'None'
-        for payload in payloads:
-            text = self.model.invoke(prompt % payload, system_prompt)
+        for html_part in html_parts:
+            messages = [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=html_part)
+            ]
+            text = self.model.invoke(messages)
             if text != 'None':
                 result = text
         if result == 'None' or len(result.split(',')) != 2:

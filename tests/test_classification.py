@@ -2,7 +2,7 @@ import unittest
 from scraperai.parsers import WebpageType, WebpageVisionClassifier
 from scraperai.crawlers import SeleniumCrawler
 from scraperai.utils.image import compress_b64_image
-from scraperai.vision.openai import VisionOpenAI
+from scraperai.lm.openai import VisionOpenAI
 from .settings import default_webmanager, OPENAI_API_KEY
 
 

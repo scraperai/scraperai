@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Optional
 
-from langchain.prompts import PromptTemplate
+from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_text_splitters import TokenTextSplitter
 from lxml import html, etree
 from pydantic import BaseModel, ValidationError
@@ -31,7 +31,7 @@ class CatalogItemDetector(ChatModelAgent):
         compressed_html, subs = minify_html(html_content, good_attrs={'class', 'href'})
         tree = html.fromstring(compressed_html)
 
-        system_prompt = PromptTemplate.from_template("""
+        system_prompt = """
 You are an HTML parser. You will be given an HTML page with a catalog.
 Your primary goal is to find classname of these elements.
 The HTML contains a catalog of projects. Each element includes name, image, url.
@@ -39,21 +39,25 @@ Your primary goal is to find xpath selectors of the catalog elements.
 It is better to use xpath with classname.
 The output should be a JSON dictionary like this:
 ```
-{{
+{
     "card": "xpath to select all catalog cards",
     "url": "xpath to select href urls",
-}}
+}
 ```
 If you have not found any relevant data return:
 ```
-{{
+{
     "card": null,
     "url": null
-}}
-```
-{extra_prompt}""")
-        html_splitted = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(compressed_html)[0]
-        system_prompt = system_prompt.format(extra_prompt=extra_prompt or '')
+}
+```"""
+        html_part = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(compressed_html)[0]
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=html_part),
+        ]
+        if extra_prompt:
+            messages.append(HumanMessage(content=extra_prompt))
 
         def _validate_catalog_item(response: Any) -> Optional[str]:
             # Validate schema
@@ -71,10 +75,7 @@ If you have not found any relevant data return:
                        f'because the number of elements the select are different: {cards_count} != {urls_count}'
             return None
 
-        data: dict[str, str] = self.query_with_validation(html_splitted,
-                                                          system_prompt,
-                                                          _validate_catalog_item,
-                                                          max_retries=3)
+        data: dict[str, str] = self.query_with_validation(messages, _validate_catalog_item, max_retries=3)
         card_xpath = data['card']
         url_xpath = data['url']
         if card_xpath is None or url_xpath is None:

@@ -1,9 +1,11 @@
 import json
 import logging
 
-from scraperai.vision.base import BaseVision
-from scraperai.lm.base import BaseJsonLM
+from langchain_core.messages import SystemMessage, HumanMessage
+
+from scraperai.lm.base import BaseJsonLM, BaseVision
 from scraperai.utils.html import split_html, HtmlPart, minify_html, remove_nodes_by_xpath
+from scraperai.utils.image import encode_image_to_b64
 
 
 class WebpageVisionDescriptor:
@@ -11,14 +13,29 @@ class WebpageVisionDescriptor:
         self.model = model
 
     def describe(self, screenshot: str) -> str:
-        system_prompt = "Your primary goal is to describe the content of the websites"
-        user_prompt = """
+        messages = [
+            SystemMessage(
+                content="Your primary goal is to describe the content of the websites"
+            ),
+            HumanMessage(
+                content=[
+                    {
+                        "type": "text",
+                        "text": """
 You are given a screenshot of the webpage. Your goal is to describe the content of the webpage in one paragraph.
 Do not describe common elements of all websites, such as header, footer, navigation menus. 
 Make a short description without extracting concrete fields values.
 It might be a page of the product, service, project or something else.
 """
-        response = self.model.invoke(user_prompt, system_prompt, screenshot)
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": encode_image_to_b64(screenshot)
+                    },
+                ]
+            )
+        ]
+        response = self.model.invoke(messages)
         return response
 
 
@@ -44,27 +61,33 @@ class WebpagePartsDescriptor:
         self.__minified_html = html
         parts = split_html(html, max_text_size=4000)
         formtted_parts = json.dumps({part.xpath: part.text_content for part in parts}, indent=4, ensure_ascii=False)
+
         system_prompt = "Your primary goal is to describe the content of the websites"
-        user_prompt = """
+        user_prompt = f"""
 You will be given a json dict where keys are xpath and values are texts:
 ```
-{
+{{
     "some xpath": "some text",
-}
+}}
 ```
 These texts are parts of one webpage. Give a very short description for each part and return as json in the following format:
 ```
-{
+{{
     "some xpath": "text description",
-}
+}}
 ```
 
 Array of texts:
 ```
-%s
+{formtted_parts}
 ```
-""" % formtted_parts
-        response = self.model.invoke(user_prompt, system_prompt)
+"""
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt)
+        ]
+
+        response = self.model.invoke(messages)
         new_parts = []
         for part in parts:
             new_parts.append(DescribedHtmlPart(
@@ -82,25 +105,29 @@ Array of texts:
         formtted_parts = json.dumps({part.xpath: part.description for part in parts}, indent=4, ensure_ascii=False)
 
         system_prompt = "You are an HTML web scraper."
-        user_prompt = """
+        user_prompt = f"""
 Imaging you are an HTML web scraper. Your goal is to find relevant information to scrape/parse on the webpage that contains information about one item.
 You are given a list of descriptions of parts of one webpage in the following json format:
 ```
-{
+{{
     "some xpath": "text description",
-}
+}}
 ```
 Return a list of xpaths that are relevant to parse in JSON format:
 ```
-{
+{{
     "relevant_xpaths": ["xpath1", "xpath2", ]
-}
+}}
 ```
 Descriptions data:
 ```
-%s
-```""" % formtted_parts
-        response = self.model.invoke(user_prompt, system_prompt)
+{formtted_parts}
+```"""
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt)
+        ]
+        response = self.model.invoke(messages)
         relevant_xpaths = set(response['relevant_xpaths'])
         for part in parts:
             if part.xpath in relevant_xpaths:
@@ -119,7 +146,7 @@ Descriptions data:
 
 def test_vision():
     from tests.settings import BASE_DIR, OPENAI_API_KEY
-    from scraperai.vision.openai import VisionOpenAI
+    from scraperai.lm.openai import VisionOpenAI
     descriptor = WebpageVisionDescriptor(VisionOpenAI(OPENAI_API_KEY))
     with open(BASE_DIR / 'tests' / 'data' / 'ozon_detail_page.html', 'r') as f:
         html_content = f.read()

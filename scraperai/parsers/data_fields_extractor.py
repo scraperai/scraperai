@@ -3,6 +3,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+from langchain_core.messages import SystemMessage, HumanMessage
 from lxml import html
 
 from scraperai.lm.base import BaseLM
@@ -21,8 +22,7 @@ class DataFieldsExtractor(ChatModelAgent):
     def extract_static_fields(self, html_content: str, context: str = None) -> list[StaticField]:
         html_snippet, _ = minify_html(html_content, use_substituions=False)
 
-        system_prompt = "You are an HTML parser. Your primary goal is to find fields with data."
-        prompt = f"""
+        system_prompt = """
 You are an HTML parser. You will be given an HTML snippet that contains information about one element. 
 This element can be a product, service, project or something else.
 
@@ -36,13 +36,15 @@ Please, extract only static sections in CSV format. You need to mention:
 2. "field_xpath" : xpath to field value
 
 If nothing found return just one row if columns names.
-Use semicolon ; as csv separator.
-{context or ''}
-The HTML:
-{html_snippet}
-"""
+Use semicolon ; as csv separator."""
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=html_snippet),
+        ]
+        if context:
+            messages.append(HumanMessage(content=context))
 
-        response = self.model.invoke(prompt, system_prompt)
+        response = self.model.invoke(messages)
         df = pd.read_csv(io.StringIO(response), header=0, delimiter=';', index_col=False).replace(np.nan, None)
         tree = html.fragment_fromstring(html_snippet, create_parent=True)
         fields = []
@@ -63,9 +65,7 @@ The HTML:
 
     def extract_dynamic_fields(self, html_content: str, context: str = None) -> list[DynamicField]:
         html_snippet, _ = minify_html(html_content, use_substituions=False)
-
-        system_prompt = "You are an HTML parser. Your primary goal is to find fields with data."
-        prompt = f"""
+        system_prompt = f"""
 You are an HTML parser. You will be given an HTML snippet that contains information about one element. 
 This element can be a product, service, project or something else.
 
@@ -82,12 +82,16 @@ First row must be columns names: section_name; name_xpath; value_xpath
 If nothing found return just one row if columns names.
 XPATHs should start with ".//".
 Use semicolon ; as csv separator. Do not add any extra symbols.
-{context or ''}
-The HTML:
-{html_snippet}
 """
 
-        response = self.model.invoke(prompt, system_prompt)
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=html_snippet),
+        ]
+        if context:
+            messages.append(HumanMessage(content=context))
+
+        response = self.model.invoke(messages)
         df = pd.read_csv(io.StringIO(response), header=0, delimiter=';', index_col=False).replace(np.nan, None)
         try:
             return [

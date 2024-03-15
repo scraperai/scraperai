@@ -1,9 +1,11 @@
 import enum
 from typing import Optional
 
+from langchain_core.messages import SystemMessage, HumanMessage
+
 from scraperai.parsers.agent import ChatModelAgent
-from scraperai.vision.base import BaseVision
-from scraperai.lm.base import BaseLM
+from scraperai.utils.image import encode_image_to_b64
+from scraperai.lm.base import BaseLM, BaseVision
 
 
 class WebpageType(str, enum.Enum):
@@ -35,9 +37,26 @@ Return only category name in the answer.
         def _validate_response(response: str) -> Optional[str]:
             try:
                 WebpageType(response)
-            except ValueError as e:
+            except ValueError:
                 return f"{response} is not a valid page type. Should be one of {WebpageType.values_repr()}"
-        text: str = self.query_with_validation(user_prompt, system_prompt, _validate_response, max_retries=2)
+            return None
+
+        messages = [
+            SystemMessage(
+                content=system_prompt
+            ),
+            HumanMessage(
+                content=[
+                    {"type": "text", "text": user_prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": encode_image_to_b64(screenshot)
+                    },
+                ]
+            )
+        ]
+
+        text: str = self.query_with_validation(messages, _validate_response, max_retries=2)
         return WebpageType(text)
 
 
@@ -45,11 +64,15 @@ class WebpageTextClassifier:
     def __init__(self, model: BaseLM):
         self.model = model
 
-    def classify(self, html: str) -> WebpageType:
-        system_prompt = "Your goal is to classify webpages by screenshot."
+    def classify(self, html_content: str) -> WebpageType:
         # TODO: Add prompt
-        user_prompt = """
-
-"""
-        response = self.model.invoke(user_prompt, system_prompt)
+        messages = [
+            SystemMessage(
+                content="Your goal is to classify webpages by screenshot."
+            ),
+            HumanMessage(
+                content=""
+            ),
+        ]
+        response = self.model.invoke(messages)
         return WebpageType(response)

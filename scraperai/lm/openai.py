@@ -3,12 +3,11 @@ import logging
 from typing import Optional
 
 from langchain_community.callbacks import get_openai_callback
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from scraperai.lm.base import BaseLM, BaseJsonLM, _DictOrList, _DictOrPydanticClass
-
+from scraperai.lm.base import BaseLM, BaseJsonLM, _DictOrList, _DictOrPydanticClass, BaseVision
 
 logger = logging.getLogger(__file__)
 
@@ -28,15 +27,7 @@ class OpenAI(BaseLM):
                                **kwargs)
         self.total_cost = 0
 
-    def invoke(self, user_prompt: str, system_prompt: str, **kwargs) -> str:
-        messages = [
-            SystemMessage(
-                content=system_prompt
-            ),
-            HumanMessage(
-                content=user_prompt
-            ),
-        ]
+    def invoke(self, messages: list[BaseMessage]) -> str:
         with get_openai_callback() as cb:
             r = self.chat.invoke(messages).content
             self.total_cost += cb.total_cost
@@ -66,15 +57,7 @@ class JsonOpenAI(BaseJsonLM):
             self.model_with_structure = self.chat.with_structured_output(schema, method='json_mode')
         self.total_cost = 0
 
-    def invoke(self, user_prompt: str, system_prompt: str, **kwargs) -> _DictOrList:
-        messages = [
-            SystemMessage(
-                content=system_prompt
-            ),
-            HumanMessage(
-                content=user_prompt
-            ),
-        ]
+    def invoke(self, messages: list[BaseMessage]) -> _DictOrList:
         with get_openai_callback() as cb:
             if self.model_with_structure:
                 response = self.model_with_structure.invoke(messages)
@@ -88,3 +71,24 @@ class JsonOpenAI(BaseJsonLM):
             return response.model_dump()
         else:
             return response
+
+
+class VisionOpenAI(BaseVision):
+    latest = 'gpt-4-vision-preview'
+
+    def __init__(self,
+                 openai_api_key: str,
+                 openai_organization: str = None,
+                 model_name: str = latest,
+                 **kwargs):
+        self.total_cost = 0.0
+        self.chat = ChatOpenAI(model=model_name,
+                               openai_api_key=openai_api_key,
+                               openai_organization=openai_organization,
+                               **kwargs)
+
+    def invoke(self, messages: list[BaseMessage]) -> str:
+        with get_openai_callback() as cb:
+            response = self.chat.invoke(messages).content
+            self.total_cost += cb.total_cost
+        return response

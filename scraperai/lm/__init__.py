@@ -1,2 +1,2 @@
-from .base import BaseLM, BaseJsonLM
-from .openai import OpenAI, JsonOpenAI
+from .base import BaseLM, BaseJsonLM, BaseVision
+from .openai import OpenAI, JsonOpenAI, VisionOpenAI
