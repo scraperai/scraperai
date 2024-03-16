@@ -78,6 +78,7 @@ class ScraperAI:
             cost += self.vision_model.total_cost
         return cost
 
+    # TODO: should be cache layer for preventing money loss
     def detect_page_type(self, url: str) -> WebpageType:
         self.crawler.get(url)
         try:
@@ -90,12 +91,15 @@ class ScraperAI:
         else:
             return WebpageTextClassifier(model=self.lm_model).classify(self.crawler.page_source)
 
+    # TODO: should be cache layer for preventing money loss
+    # TODO: here extra_prompt also actual.
     def detect_pagination(self, url: str) -> Pagination:
         self.crawler.get(url)
         html_content = self.crawler.page_source
         pagination = PaginationDetector(model=self.lm_model).find_pagination(html_content)
         return pagination
 
+    # TODO: should be cache layer for preventing money loss
     def detect_catalog_item(self, url: str, extra_prompt: str = None) -> CatalogItem | None:
         self.crawler.get(url)
         html_content = self.crawler.page_source

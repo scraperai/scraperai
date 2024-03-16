@@ -66,7 +66,7 @@ class Controller:
 
     def detect_page_type(self):
         self.view.show_page_type_screen(status=ScreenStatus.loading)
-        page_type = WebpageType.CATALOG# self.scraper.detect_page_type(self.start_url)
+        page_type = WebpageType.CATALOG # self.scraper.detect_page_type(self.start_url)
         self.view.show_page_type_screen(status=ScreenStatus.show, page_type=page_type)
 
         page_type = self.view.show_page_type_screen(status=ScreenStatus.edit, page_type=page_type)

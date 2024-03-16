@@ -1,9 +1,7 @@
 <p align="center">
-  <a href="https://www.medusajs.com">
   <picture>
-    <img alt="Medusa logo" height="150px" src="images/logo.png">
-    </picture>
-  </a>
+    <img alt="ScraperAI Logo" height="150px" src="images/logo.png">
+  </picture>
 </p>
 <h1 align="center">
   ScraperAI
@@ -12,10 +10,12 @@
     ⚡ Scraping has never been easier ⚡
 </p>
 
+<!--
 <h4 align="center">
   <a href="https://docs.scraper-ai.com">Documentation</a> |
   <a href="https://scraper-ai.com">Website</a>
 </h4>
+-->
 
 ## What is ScraperAI
 
