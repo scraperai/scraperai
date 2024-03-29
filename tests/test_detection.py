@@ -20,7 +20,7 @@ class TestDetection(unittest.TestCase):
             ),
             # ('https://www.ozon.ru/category/smartfony-15502/', False),
         ]
-        detector = PaginationDetector(model=OpenAI(OPENAI_API_KEY))
+        detector = PaginationDetector(model=JsonOpenAI(OPENAI_API_KEY))
         driver = default_webmanager.create_driver()
         crawler = SeleniumCrawler(driver)
         for url, correct_pagination in pagination_tests:

@@ -31,6 +31,15 @@ class CatalogItem(BaseModel):
     html_snippet: str
     urls_on_page: list[str]
 
+    def __repr__(self):
+        urls_to_print = self.urls_on_page[0:3]
+        if len(self.urls_on_page) > 3:
+            urls_to_print.append(f'...')
+        return f"""<card_xpath={self.card_xpath}
+ url_xpath={self.url_xpath}
+ urls_on_page={self.urls_on_page}
+>"""
+
 
 class Pagination(BaseModel):
     type: Literal['xpath', 'scroll', 'url_param']

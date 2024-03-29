@@ -19,7 +19,7 @@ from scraperai.crawlers import SeleniumCrawler
 
 class Controller:
     crawler: BaseCrawler = None
-    scraper: ParserAI = None
+    parser: ParserAI = None
     page_type: WebpageType = None
     pagination: Pagination = None
     catalog_item: CatalogItem = None
@@ -44,7 +44,7 @@ class Controller:
             fields=self.fields,
             max_pages=self.max_pages,
             max_rows=self.max_rows,
-            total_cost=self.scraper.total_cost
+            total_cost=self.parser.total_cost
         )
 
     def init_crawler(self):
@@ -63,12 +63,12 @@ class Controller:
         else:
             openai_api_key = self.view.show_api_key_screen(status=ScreenStatus.edit)
 
-        self.scraper = ParserAI(initial_url=self.start_url, openai_api_key=openai_api_key)
+        self.parser = ParserAI(openai_api_key=openai_api_key)
 
     def detect_page_type(self):
         self.view.show_page_type_screen(status=ScreenStatus.loading)
         self.crawler.get(self.start_url)
-        page_type = self.scraper.detect_page_type(
+        page_type = self.parser.detect_page_type(
             page_source=self.crawler.page_source,
             screenshot=self.crawler.get_screenshot_as_base64()
         )
@@ -80,7 +80,7 @@ class Controller:
     def detect_pagination(self):
         self.view.show_pagination_screen(status=ScreenStatus.loading)
         self.crawler.get(self.start_url)
-        pagination = self.scraper.detect_pagination(page_source=self.crawler.page_source)
+        pagination = self.parser.detect_pagination(page_source=self.crawler.page_source)
         self.view.show_pagination_screen(status=ScreenStatus.show, pagination=pagination)
         pagination = self.view.show_pagination_screen(status=ScreenStatus.edit, pagination=pagination)
         self.pagination = pagination
@@ -90,8 +90,9 @@ class Controller:
         if catalog_item is None:
             try:
                 self.crawler.get(self.start_url)
-                catalog_item = self.scraper.detect_catalog_item(page_source=self.crawler.page_source,
-                                                                extra_prompt=extra_prompt)
+                catalog_item = self.parser.detect_catalog_item(page_source=self.crawler.page_source,
+                                                               website_url=self.start_url,
+                                                               extra_prompt=extra_prompt)
             except NotFoundError:
                 catalog_item = None
         self.view.show_card_screen(status=ScreenStatus.show, catalog_item=catalog_item)
@@ -111,9 +112,10 @@ class Controller:
                     extra_prompt = f'I can give you following instruction: {edit_form.user_suggestion}'
                 return self.detect_catalog_item(extra_prompt)
             else:
-                catalog_item = self.scraper.manually_change_catalog_item(self.crawler.page_source,
-                                                                         edit_form.new_card_xpath,
-                                                                         edit_form.new_url_xpath)
+                catalog_item = self.parser.manually_change_catalog_item(self.crawler.page_source,
+                                                                        edit_form.new_card_xpath,
+                                                                        edit_form.new_url_xpath,
+                                                                        website_url=self.start_url)
                 return self.detect_catalog_item(catalog_item=catalog_item)
 
         if catalog_item is None:
@@ -138,13 +140,13 @@ class Controller:
         self.view.show_fields_screen(status=ScreenStatus.loading)
         if nested_page_url is not None:
             self.crawler.get(nested_page_url)
-            html_snippet = self.scraper.summarize_details_page_as_valid_html(
+            html_snippet = self.parser.summarize_details_page_as_valid_html(
                 page_source=self.crawler.page_source,
                 screenshot=self.crawler.get_screenshot_as_base64()
             )
-            fields = self.scraper.extract_fields(html_snippet)
+            fields = self.parser.extract_fields(html_snippet)
         elif html_snippet is not None:
-            fields = self.scraper.extract_fields(html_snippet)
+            fields = self.parser.extract_fields(html_snippet)
         else:
             raise ValueError
         self.view.show_fields_screen(status=ScreenStatus.show, fields=fields)
@@ -156,7 +158,7 @@ class Controller:
 
             if edit_form.action_type == 'a':
                 self.view.show_fields_screen(status=ScreenStatus.loading)
-                new_fields = self.scraper.find_fields(html_snippet, edit_form.user_suggestion)
+                new_fields = self.parser.find_fields(html_snippet, edit_form.user_suggestion)
                 if new_fields.is_empty:
                     self.view.show_fields_screen(status=ScreenStatus.show, not_found_message='Nothing found')
                 else:

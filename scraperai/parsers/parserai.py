@@ -21,13 +21,11 @@ logger = logging.getLogger(__file__)
 
 class ParserAI:
     def __init__(self,
-                 initial_url: str,
                  lm_model: BaseLM = None,
                  json_lm_model: JsonOpenAI = None,
                  vision_model: BaseVision = None,
                  openai_api_key: str = None,
                  openai_organization: str = None):
-        self.initial_url = initial_url
         if lm_model is None:
             self.lm_model = OpenAI(openai_api_key, openai_organization, temperature=0)
         else:
@@ -64,18 +62,18 @@ class ParserAI:
             raise ValueError('One of page_source, screenshot must not be None')
 
     def detect_pagination(self, page_source: str) -> Pagination:
-        return PaginationDetector(model=self.lm_model).find_pagination(page_source)
+        return PaginationDetector(model=self.json_lm_model).find_pagination(page_source)
 
-    def detect_catalog_item(self, page_source: str, extra_prompt: str = None) -> CatalogItem | None:
+    def detect_catalog_item(self, page_source: str, website_url: str, extra_prompt: str = None) -> CatalogItem | None:
         detector = CatalogItemDetector(model=self.json_lm_model)
         item = detector.detect_catalog_item(page_source, extra_prompt)
-        item.urls_on_page = [fix_relative_url(self.initial_url, u) for u in item.urls_on_page]
+        item.urls_on_page = [fix_relative_url(website_url, u) for u in item.urls_on_page]
         return item
 
-    def manually_change_catalog_item(self, page_source: str, card_xpath: str, url_xpath: str):
+    def manually_change_catalog_item(self, page_source: str, card_xpath: str, url_xpath: str, website_url: str):
         detector = CatalogItemDetector(model=self.json_lm_model)
         item = detector.manually_change_catalog_item(page_source, card_xpath, url_xpath)
-        item.urls_on_page = [fix_relative_url(self.initial_url, u) for u in item.urls_on_page]
+        item.urls_on_page = [fix_relative_url(website_url, u) for u in item.urls_on_page]
         return item
 
     def extract_fields(self, html_snippet: str) -> WebpageFields:

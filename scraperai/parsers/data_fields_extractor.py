@@ -137,6 +137,8 @@ XPATHs should start with ".//".
             html_snippet,
             context=f'You have already found this static fields: {static_fields_str}. Do not add them.'
         )
+        # print(type(static_fields))
+        # print(type(static_fields[0]))
         return WebpageFields(static_fields=static_fields, dynamic_fields=dynamic_fields)
 
     def find_fields(self, html_snippet: str, user_description: str) -> WebpageFields:

@@ -41,12 +41,16 @@ def delete_field_by_name(fields: WebpageFields, field_name_to_delete: str) -> bo
 def delete_fields_by_range(fields: WebpageFields, range_to_delete: set[int]) -> bool:
     deleted = False
     offset_index = len(fields.static_fields)
-    for i in range(len(fields.static_fields)):
-        if i in range_to_delete:
-            del fields.static_fields[i]
+
+    indices_to_remove = list(range_to_delete)
+    indices_to_remove.sort(reverse=True)
+    for index in indices_to_remove:
+        if 0 <= index < len(fields.static_fields):
+            fields.static_fields.pop(index)
             deleted = True
-    for i in range(len(fields.dynamic_fields)):
-        if i + offset_index in range_to_delete:
-            del fields.dynamic_fields[i]
+
+    for index in indices_to_remove:
+        if 0 <= index - offset_index < len(fields.dynamic_fields):
+            fields.dynamic_fields.pop(index - offset_index)
             deleted = True
     return deleted

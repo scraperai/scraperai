@@ -4,7 +4,7 @@ from typing import Callable
 from bs4 import BeautifulSoup
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from scraperai.lm.base import BaseLM
+from scraperai.lm.base import BaseJsonLM
 from scraperai.parsers.agent import ChatModelAgent
 from scraperai.parsers.models import Pagination
 from scraperai.utils.html import minify_html
@@ -15,7 +15,7 @@ logger = logging.getLogger(__file__)
 
 
 class PaginationDetector(ChatModelAgent):
-    def __init__(self, model: BaseLM):
+    def __init__(self, model: BaseJsonLM):
         super().__init__(model)
         self.model = model
         self.max_chunk_size = 24000
@@ -56,18 +56,25 @@ class PaginationDetector(ChatModelAgent):
 This HTML contains a list of elements and button to show more elements or to switch page.
 Text of the button can be "More", "Load more", "Next", "Next page" and any other.
 Your goal is to find classname of this button.
-Return classname if found or "None" instead, no other words. """
+Return classname in a json format:
+```
+{"classname": "some classname"}
+```
+If nothing found, return:
+```
+{"classname": null}
+```
+"""
 
         html_parts = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
-        classname = 'None'
+        classname = None
         for html_part in reversed(html_parts):
             messages = [
                 SystemMessage(content=system_prompt),
                 HumanMessage(content=html_part)
             ]
-            text = self.model.invoke(messages)
-            if text != 'None':
-                classname = text
+            resp = self.model.invoke(messages)
+            classname = resp['classname']
         if len(initial_soup.find_all(class_=classname)) == 1:
             return f"//*[@class='{classname}']"
         return None
@@ -83,27 +90,41 @@ Return classname if found or "None" instead, no other words. """
 
         system_prompt = """You are an HTML parser. Your primary goal is to find pagination on the web page.
 This HTML contains a list of elements and button to show more elements.
-Text of the button can be "More", "Load more", "Показать еще", 
-"Еще", "Дальше", "Следующая страница". Your goal is to find text and tag of this button.
-Return button text and tag in a form "text,tag" if found or "None" instead, no other words."""
+Text of the button can be "More", "Load more", "Next page", "Next" and so on. Your goal is to find text and tag of this button.
+Return button text and tag name in a json form:
+```
+{
+    "text": "button text",
+    "tag": "tag name"
+}
+``` 
+If nothing found, return:
+```
+{
+    "text": null,
+    "tag": null
+}
+```
+"""
 
         html_parts = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
-        result = 'None'
+
+        result = None
         for html_part in html_parts:
             messages = [
                 SystemMessage(content=system_prompt),
                 HumanMessage(content=html_part)
             ]
-            text = self.model.invoke(messages)
-            if text != 'None':
-                result = text
-        if result == 'None' or len(result.split(',')) != 2:
-            logger.error(f'Wrong response: {result}')
+            resp = self.model.invoke(messages)
+            if resp['tag'] is not None:
+                result = resp
+
+        if result is None:
             return None
-        name, tag = result.split(',')
-        buttons = initial_soup.find_all(lambda t: t.name == tag and name in t.text)
+
+        tag, button_text = result['tag'], result['text']
+        buttons = initial_soup.find_all(lambda t: t.name == tag and button_text in t.text)
         if len(buttons) == 1:
-            return f"//{tag}[text()='{name}']"
+            return f"//{tag}[text()='{button_text}']"
         else:
-            logger.error(f'Wrong response: {result}')
             return None

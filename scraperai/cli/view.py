@@ -83,7 +83,7 @@ class View:
                 click.echo(f'Detected catalog item!\n'
                            f'- card xpath: {catalog_item.card_xpath}\n'
                            f'- href xpath: {catalog_item.url_xpath}\n'
-                           f'- urls on page ({len(catalog_item.urls_on_page)}):\n'
+                           f'- urls on page ({len(catalog_item.urls_on_page)}+):\n'
                            f'{urls_text}')
 
         elif status == ScreenStatus.edit:
@@ -144,7 +144,7 @@ class View:
                 if model.action_type == 'a':
                     model.user_suggestion = click.prompt('Enter description of the field(s)')
                 else:
-                    model.field_to_delete = click.prompt('Enter field name or index')
+                    model.field_to_delete = click.prompt('Enter field name, index or range (e.g. 1-3,5,6)')
             return model
 
     def show_limits_screen(self) -> tuple[int, int]:

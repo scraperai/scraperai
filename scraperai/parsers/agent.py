@@ -19,7 +19,7 @@ class ChatModelAgent:
                               max_retries: int = 3,
                               current_try: int = 0) -> Any:
         response = self.model.invoke(messages)
-        logger.info(f'Got response: {response}')
+        # logger.info(f'Got response: {response}')
         try:
             new_error_message = validator(response)
         except Exception:
