@@ -2,6 +2,7 @@
 /core/.idea
 /backend/.idea
 /venv/
+/.venv/
 /build
 /dist
 
@@ -10,6 +11,6 @@
 
 
 *.rdb
-*.env*
+*.env
 /scraperai.egg-info/
 /*.png

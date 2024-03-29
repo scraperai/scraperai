@@ -1,0 +1,52 @@
+import re
+
+from scraperai.parsers.models import WebpageFields
+
+
+def convert_ranges_to_indices(input_str: str) -> set[int]:
+    """
+
+    :param input_str: range string e.g. "1-5, 3,4,5"
+    :return:
+    """
+    result = set()
+    input_str = input_str.replace(' ', '')
+    if not re.match(r'[0-9,-]+', input_str):
+        raise ValueError('Not a valid range')
+    elements = input_str.split(',')
+    for element in elements:
+        if '-' in element:
+            start, end = element.split('-')
+            result.update(range(int(start), int(end) + 1))
+        else:
+            result.add(int(element))
+    return result
+
+
+def delete_field_by_name(fields: WebpageFields, field_name_to_delete: str) -> bool:
+    deleted = False
+    for i in range(len(fields.static_fields)):
+        if fields.static_fields[i].field_name == field_name_to_delete:
+            del fields.static_fields[i]
+            deleted = True
+            break
+    for i in range(len(fields.dynamic_fields)):
+        if fields.dynamic_fields[i].section_name == field_name_to_delete:
+            del fields.dynamic_fields[i]
+            deleted = True
+            break
+    return deleted
+
+
+def delete_fields_by_range(fields: WebpageFields, range_to_delete: set[int]) -> bool:
+    deleted = False
+    offset_index = len(fields.static_fields)
+    for i in range(len(fields.static_fields)):
+        if i in range_to_delete:
+            del fields.static_fields[i]
+            deleted = True
+    for i in range(len(fields.dynamic_fields)):
+        if i + offset_index in range_to_delete:
+            del fields.dynamic_fields[i]
+            deleted = True
+    return deleted
