@@ -6,7 +6,7 @@ import pandas as pd
 from scraperai.cli.model import ScreenStatus, CardEditFormModel, FieldsEditFormModel
 from scraperai.parsers import WebpageType, Pagination
 from scraperai.parsers.models import CatalogItem, WebpageFields
-from scraperai.scraper import ScrapingSummary
+from scraperai.parsers.models import ScrapingSummary
 
 
 class View:
@@ -88,7 +88,7 @@ class View:
 
         elif status == ScreenStatus.edit:
             model = CardEditFormModel(has_changes=False)
-            if click.confirm('Do you want to change it?', default=False):
+            if click.confirm('Do you want to change it?', default=catalog_item is None):
                 model.has_changes = True
                 if click.confirm("Do you know card's xpath?", default=False):
                     model.new_card_xpath = click.prompt('Enter xpath to select catalog cards')
@@ -98,7 +98,7 @@ class View:
             return model
 
     def show_open_nested_pages_screen(self) -> bool:
-        return click.confirm('Do you want to parse nested pages?', default=True)
+        return click.confirm('Do you want to parse nested pages?', default=False)
 
     @staticmethod
     def _print_fields(fields: WebpageFields):
@@ -138,7 +138,8 @@ class View:
                 model.has_changes = True
                 model.action_type = click.prompt(
                     'Do you want to add or remove field?',
-                    type=click.Choice(['a', 'r'], case_sensitive=False)
+                    type=click.Choice(['a', 'r'], case_sensitive=False),
+                    default='a'
                 )
                 if model.action_type == 'a':
                     model.user_suggestion = click.prompt('Enter description of the field(s)')

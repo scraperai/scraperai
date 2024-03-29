@@ -8,17 +8,18 @@ from dotenv import find_dotenv, load_dotenv
 
 from scraperai import BaseCrawler
 from scraperai.cli.model import ScreenStatus
+from scraperai.cli.utils import convert_ranges_to_indices, delete_fields_by_range, delete_field_by_name
 from scraperai.cli.view import View
 from scraperai.exceptions import NotFoundError
 from scraperai.parsers import WebpageType, Pagination
-from scraperai.parsers.models import CatalogItem, WebpageFields
-from scraperai.scraper import ScraperAI, ScrapingSummary
+from scraperai.parsers.models import CatalogItem, WebpageFields, ScrapingSummary
+from scraperai import ParserAI
 from scraperai.crawlers import SeleniumCrawler
 
 
 class Controller:
     crawler: BaseCrawler = None
-    scraper: ScraperAI = None
+    scraper: ParserAI = None
     page_type: WebpageType = None
     pagination: Pagination = None
     catalog_item: CatalogItem = None
@@ -62,11 +63,15 @@ class Controller:
         else:
             openai_api_key = self.view.show_api_key_screen(status=ScreenStatus.edit)
 
-        self.scraper = ScraperAI(crawler=self.crawler, openai_api_key=openai_api_key)
+        self.scraper = ParserAI(initial_url=self.start_url, openai_api_key=openai_api_key)
 
     def detect_page_type(self):
         self.view.show_page_type_screen(status=ScreenStatus.loading)
-        page_type = self.scraper.detect_page_type(self.start_url)
+        self.crawler.get(self.start_url)
+        page_type = self.scraper.detect_page_type(
+            page_source=self.crawler.page_source,
+            screenshot=self.crawler.get_screenshot_as_base64()
+        )
         self.view.show_page_type_screen(status=ScreenStatus.show, page_type=page_type)
 
         page_type = self.view.show_page_type_screen(status=ScreenStatus.edit, page_type=page_type)
@@ -74,7 +79,8 @@ class Controller:
 
     def detect_pagination(self):
         self.view.show_pagination_screen(status=ScreenStatus.loading)
-        pagination = self.scraper.detect_pagination(self.start_url)
+        self.crawler.get(self.start_url)
+        pagination = self.scraper.detect_pagination(page_source=self.crawler.page_source)
         self.view.show_pagination_screen(status=ScreenStatus.show, pagination=pagination)
         pagination = self.view.show_pagination_screen(status=ScreenStatus.edit, pagination=pagination)
         self.pagination = pagination
@@ -83,7 +89,9 @@ class Controller:
         self.view.show_card_screen(status=ScreenStatus.loading)
         if catalog_item is None:
             try:
-                catalog_item = self.scraper.detect_catalog_item(self.start_url, extra_prompt)
+                self.crawler.get(self.start_url)
+                catalog_item = self.scraper.detect_catalog_item(page_source=self.crawler.page_source,
+                                                                extra_prompt=extra_prompt)
             except NotFoundError:
                 catalog_item = None
         self.view.show_card_screen(status=ScreenStatus.show, catalog_item=catalog_item)
@@ -103,7 +111,7 @@ class Controller:
                     extra_prompt = f'I can give you following instruction: {edit_form.user_suggestion}'
                 return self.detect_catalog_item(extra_prompt)
             else:
-                catalog_item = self.scraper.manually_change_catalog_item(self.start_url,
+                catalog_item = self.scraper.manually_change_catalog_item(self.crawler.page_source,
                                                                          edit_form.new_card_xpath,
                                                                          edit_form.new_url_xpath)
                 return self.detect_catalog_item(catalog_item=catalog_item)
@@ -129,7 +137,11 @@ class Controller:
     def detect_fields(self, *, nested_page_url: str = None, html_snippet: str = None):
         self.view.show_fields_screen(status=ScreenStatus.loading)
         if nested_page_url is not None:
-            html_snippet = self.scraper.summarize_details_page_as_valid_html(nested_page_url)
+            self.crawler.get(nested_page_url)
+            html_snippet = self.scraper.summarize_details_page_as_valid_html(
+                page_source=self.crawler.page_source,
+                screenshot=self.crawler.get_screenshot_as_base64()
+            )
             fields = self.scraper.extract_fields(html_snippet)
         elif html_snippet is not None:
             fields = self.scraper.extract_fields(html_snippet)
@@ -153,20 +165,12 @@ class Controller:
                     self.view.show_fields_screen(status=ScreenStatus.show, fields=fields)
                     self._highlight_fields(fields)
             else:
-                field_name = edit_form.field_to_delete
-                deleted = False
-                offset_index = len(fields.static_fields)
-                for i in range(len(fields.static_fields)):
-                    if fields.static_fields[i].field_name == field_name or str(i) == field_name:
-                        del fields.static_fields[i]
-                        deleted = True
-                        break
-                for i in range(len(fields.dynamic_fields)):
-                    curr_index = str(i + offset_index)
-                    if fields.dynamic_fields[i].section_name == field_name or curr_index == field_name:
-                        del fields.dynamic_fields[i]
-                        deleted = True
-                        break
+                try:
+                    range_to_delete = convert_ranges_to_indices(edit_form.field_to_delete)
+                    deleted = delete_fields_by_range(fields, range_to_delete)
+                except ValueError:
+                    field_name_to_delete = edit_form.field_to_delete
+                    deleted = delete_field_by_name(fields, field_name_to_delete)
                 if deleted:
                     self.view.show_fields_screen(status=ScreenStatus.show, fields=fields)
                     self._highlight_fields(fields)
@@ -181,13 +185,13 @@ class Controller:
             return
         elif self.page_type == WebpageType.DETAILS:
             rows = []
-            for row in self.scraper.iter_data_from_nested_pages([self.start_url], self.fields):
+            for row in self.crawler.iter_data_from_nested_pages([self.start_url], self.fields):
                 rows.append(row)
         else:
             if self.open_nested_pages:
                 urls: set[str] = set()
 
-                urls_iterator = self.scraper.iter_urls_to_nested_pages(
+                urls_iterator = self.crawler.iter_urls_to_nested_pages(
                     self.start_url,
                     self.pagination,
                     self.catalog_item.url_xpath,
@@ -199,13 +203,13 @@ class Controller:
                         bar.update(1)
                 click.echo(f'Collected {len(urls)} urls to nested pages')
                 rows = []
-                data_iterator = self.scraper.iter_data_from_nested_pages(urls, self.fields, self.max_rows)
+                data_iterator = self.crawler.iter_data_from_nested_pages(urls, self.fields, self.max_rows)
                 with View.progressbar(data_iterator, length=self.max_rows, label='Scraping nested pages') as bar:
                     for row in bar:
                         rows.append(row)
             else:
                 rows = []
-                data_iterator = self.scraper.iter_data_from_catalog_pages(
+                data_iterator = self.crawler.iter_data_from_catalog_pages(
                     self.start_url,
                     self.pagination,
                     self.catalog_item.card_xpath,
@@ -284,9 +288,9 @@ class Controller:
         self.export_results()
         self.quit('Thank you for using ScraperAI!')
 
-    def quit(self, message: str = None):
+    def quit(self, message: str = None, exit_code: int = 0):
         if message:
             click.echo(message)
         if isinstance(self.crawler, SeleniumCrawler):
             self.crawler.driver.quit()
-        exit(0)
+        exit(exit_code)

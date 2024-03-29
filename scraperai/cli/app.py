@@ -1,10 +1,26 @@
+import logging
+
 import click
 
 from scraperai.cli.controller import Controller
 
 
+def logging_option(func):
+    def callback(ctx, param, value):
+        level = getattr(logging, value.upper(), None)
+        if level is None:
+            raise click.BadParameter(f'Unknown log level: {value}')
+        logging.basicConfig(level=level)
+        return value
+
+    return click.option('--log-level', default='INFO', show_default=True,
+                        expose_value=False, callback=callback,
+                        help='Set the logging level')(func)
+
+
 @click.command()
 @click.option('--url', prompt='Enter url', help='url of the catalog or product page of any website')
+@logging_option
 def main(url: str):
     """ScraperAI CLI Application
 
@@ -17,9 +33,9 @@ def main(url: str):
     try:
         app.run()
     except Exception as e:
-        click.echo(f'Unexpected exception: {e}')
-        # app.quit()
-        raise e
+        logging.exception(e)
+        logging.error(e)
+        app.quit(exit_code=-1)
 
 
 if __name__ == '__main__':

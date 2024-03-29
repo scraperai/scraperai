@@ -1,31 +1,32 @@
 import logging
 import time
 
+import selenium
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver as BaseSeleniumWebDriver
 
 from scraperai.crawlers.base import BaseCrawler
 from scraperai.crawlers.webdriver import utils
 from scraperai.crawlers.webdriver.local import DefaultChromeWebdriver
-
+from scraperai.parsers.models import Pagination
+from scraperai.utils import add_or_replace_url_param, get_url_query_param_value
 
 logger = logging.getLogger(__file__)
 
 
 class SeleniumCrawler(BaseCrawler):
+    current_url: str = None
     def __init__(self, driver: BaseSeleniumWebDriver = None):
         if driver is None:
             self.driver = DefaultChromeWebdriver()
         else:
             self.driver = driver
-        self.current_url = None
 
     def get(self, url: str):
         if self.current_url == url:
             return
         self.driver.get(url)
         time.sleep(1)
-        self.driver.execute_script("document.body.style.zoom='60%'")
         self.current_url = url
 
     @property
@@ -37,13 +38,61 @@ class SeleniumCrawler(BaseCrawler):
         elem.click()
 
     def get_screenshot_as_base64(self) -> str:
-        return self.driver.get_screenshot_as_base64()
+        self.driver.execute_script("document.body.style.zoom='60%'")
+        screenshot = self.driver.get_screenshot_as_base64()
+        self.driver.execute_script("document.body.style.zoom='100%'")
+        return screenshot
 
     def highlight_by_xpath(self, xpath: str, color: str, border: int):
-        if xpath.split('/')[-1].startswith('@'):
+        last_component = xpath.split('/')[-1]
+        if last_component.startswith('@') or last_component == 'text()':
             xpath = '/'.join(xpath.split('/')[:-1])
         try:
             for element in self.driver.find_elements(By.XPATH, xpath):
                 utils.highlight(self.driver, element, color, border)
         except Exception as e:
             logger.exception(e)
+
+    def scroll_to_bottom(self) -> bool:
+        """Scrolls the webpage to the bottom using Selenium"""
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
+        scrolled= False
+        while True:
+            # Scroll down to the bottom.
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # Wait for the page to load.
+            time.sleep(2)
+            # Calculate new scroll height and compare with last scroll height.
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+            scrolled = True
+        return scrolled
+
+    def switch_page(self, pagination: Pagination) -> bool:
+        if pagination.type == 'xpath':
+            try:
+                self.click(pagination.xpath)
+                time.sleep(3)
+                return True
+            except selenium.common.exceptions.ElementClickInterceptedException as e:
+                logger.exception(e)
+                return False
+            except Exception as e:
+                logger.exception(e)
+                return False
+        elif pagination.type == 'url_param':
+            params = get_url_query_param_value(self.current_url, pagination.url_param)
+            if params is None:
+                new_page = pagination.url_param_first_value
+            else:
+                new_page = int(params[0]) + 1
+            new_url = add_or_replace_url_param(self.current_url, pagination.url_param, new_page)
+            self.get(new_url)
+            # TODO: How to stop pagination?
+            return True
+        elif pagination.type == 'scroll':
+            return self.scroll_to_bottom()
+        else:
+            raise TypeError
