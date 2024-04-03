@@ -1,12 +1,23 @@
-from selenium.webdriver.remote.webelement import WebElement
+import logging
+
+from selenium.common import JavascriptException
 from selenium.webdriver.remote.webdriver import WebDriver
 
 
-def highlight(driver: WebDriver, element: WebElement, color: str, border: int):
-    """Highlights (blinks) a Selenium Webdriver element"""
+logger = logging.getLogger(__file__)
 
-    def apply_style(s):
-        driver.execute_script("arguments[0].setAttribute('style', arguments[1]);", element, s)
 
-    original_style = element.get_attribute('style')
-    apply_style("border: {0}px solid {1};".format(border, color))
+def highlight_by_xpath(driver: WebDriver, xpath: str, color: str, border: int):
+    xpath = xpath.replace('"', '\'')
+    script = f"""
+var result = document.evaluate("{xpath}", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+for (var i = 0; i < result.snapshotLength; i++) {{
+    var element = result.snapshotItem(i);
+    if (element.style) {{
+        element.style.border = '{border}px solid {color}';
+    }}
+}}"""
+    try:
+        driver.execute_script(script)
+    except JavascriptException as e:
+        logger.exception(e)

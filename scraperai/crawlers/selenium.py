@@ -44,14 +44,7 @@ class SeleniumCrawler(BaseCrawler):
         return screenshot
 
     def highlight_by_xpath(self, xpath: str, color: str, border: int):
-        last_component = xpath.split('/')[-1]
-        if last_component.startswith('@') or last_component == 'text()':
-            xpath = '/'.join(xpath.split('/')[:-1])
-        try:
-            for element in self.driver.find_elements(By.XPATH, xpath):
-                utils.highlight(self.driver, element, color, border)
-        except Exception as e:
-            logger.exception(e)
+        utils.highlight_by_xpath(self.driver, xpath, color, border)
 
     def _scroll(self, times: int = 10, delay: float = 0.4):
         for _ in range(times):

@@ -7,13 +7,11 @@ import json
 from urllib.parse import urlparse
 
 from selenium import webdriver
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 from .base import BaseWebdriver
-from .utils import highlight
 from .storage import LocalStorage
 from .useragents import get_random_useragent
 
@@ -88,9 +86,6 @@ class RemoteWebdriver(webdriver.Remote, BaseWebdriver):
         body = json.dumps({'cmd': cmd, 'params': cmd_args})
         response = self.command_executor._request('POST', url, body)
         return response.get('value')
-
-    def highlight(self, element: WebElement, color: str, border: int):
-        highlight(self, element, color, border)
 
     @property
     def vnc_url(self) -> str:

@@ -6,7 +6,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 from .base import BaseWebdriver
-from .utils import highlight
 from .storage import LocalStorage
 from .useragents import get_random_useragent
 
@@ -49,6 +48,3 @@ class DefaultChromeWebdriver(webdriver.Chrome, BaseWebdriver):
 
     def set_storage(self, key, value):
         self.local_storage.set(key, value)
-
-    def highlight(self, element: WebElement, color: str, border: int):
-        highlight(self, element, color, border)

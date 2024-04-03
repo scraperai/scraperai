@@ -1,3 +1,4 @@
+import time
 import unittest
 
 from scraperai import SeleniumCrawler
@@ -57,6 +58,19 @@ class TestWebdrivers(unittest.TestCase):
         crawler.highlight_by_xpath("//*[@class='product']//a[@class='product_img']/@href", 'red', 5)
         crawler.get_screenshot_as_base64()
         crawler.click(xpath)
+        driver.quit()
+
+    def test_highlight(self):
+        webmanager = WebdriversManager(selenoids=[
+            SelenoidSettings(url=SELENOID_URL, max_sessions=10, capabilities=selenoid_capabilities)
+        ])
+        driver = webmanager.create_driver()
+        crawler = SeleniumCrawler(driver)
+        crawler.get('https://www.ycombinator.com/companies')
+        start = time.time()
+        crawler.highlight_by_xpath("//a[contains(@class,'_company_1rnar_339')]", '#8981D7', 5)
+        crawler.highlight_by_xpath("//a[contains(@class,'_company_1rnar_339')]/@href", '#5499D1', 3)
+        self.assertLess(time.time() - start, 1.0)
         driver.quit()
 
 
