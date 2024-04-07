@@ -19,14 +19,13 @@
 
 ## What is ScraperAI
 
-ScrpaerAI is an AI-powered tool that allows users to prepare reciepts ...
-
-### Requirements
-- Selenium
-- OpenAI
-- ...
+ScraperAI is an open-source, AI-powered tool designed to simplify web scraping for users of all skill levels. 
+By leveraging Large Language Models, such as ChatGPT, ScraperAI extracts data from web pages and generates 
+reusable and shareable scraping recipes.
 
 ### Installation
+
+Install ScraperAI easily using pip or from the source.
 
 With pip:
 ```bash
@@ -38,32 +37,87 @@ git clone https://github.com/scraperai/scraperai.git
 pip install ./scraperai
 ```
 
+### Features
+
+#### Page type detection
+
+Web pages are categorized into four types:
+
+- **Catalog**: Pages with similar repeating elements, such as product lists, articles, companies or table rows.
+- **Details**: Pages detailing information about a single product.
+- **Captcha**: Captcha pages that hinder scraping efforts. Currently, we do not provide solutions to circumvent captchas.
+- **Other**: All other page types not currently supported.
+
+ScraperAI primarily uses page screenshots and the GPT-4 Vision model for page type determination, with a fallback algorithm for cases where screenshots or Vision model access is unavailable. Users can manually set the page type if known.
+
+#### Pagination detection
+This feature is applicable for catalog-type web pages, supporting:
+
+- `xpath`: Xpath of pagination buttons like "Next page", "More", etc.
+- `scroll`: Infinite scrolling.
+- `url_param`: URL parameter-based pagination (e.g., `website.com/?page=1`).
+
+#### Catalog item detection
+This feature is applicable only for catalog-type web pages.
+
+
+#### Fields extractor
+
+Fields extractor allows to detect relevant information on the page and then find XPATHs that allows to select detected information.
+
+We define two types of data fields within HTML page:
+
+- **Static fields:** Fields without explicit names, containing single or multiple values (e.g., product names or prices).
+- **Dynamic fields:** Fields with both names and values, typically formatted like table entries.
+
+#### WebCrawler
+Our WebCrawler is engineered to:
+
+- Access web pages.
+- Simulate human actions (clicking, scrolling).
+- Capture screenshots of web pages.
+
+Selenium webdriver is the default tool due to its convenience and ease of use, incorporating techniques to avoid most website blocks. 
+Users can implement their versions using other tools like PlayWright. 
+The requests package is also supported, albeit with some limitations.
+
 ## Demo
+### Jupyter notebook
+We put example of basic scraper usage in the `example.ipynb`. 
+In this notebook we present two expirements:
+1. [List of YCombinator companies](https://www.ycombinator.com/companies/)
+2. [List of commits in the repository](https://github.com/scraperai/scraperai/commits/main/)
+
 
 ### CLI Application
 ScraperAI has a built-in CLI application. Simply run:
 ```bash
 scraperai --url https://www.ycombinator.com/companies
 ```
-or
+or simply
 ```bash
 scraperai
 ```
-Next, just follow a step-by-step flow. ScraperAI will try to automatically detect page type, pagination, catalog's card and data-fields. At each step, you can check and correct the detection results.
 
-Currently, CLI suppots only `OpenAI` chat model. Therefore you need an openai_api_key to use the app. There are two ways to pass the key.
-The first is to add `OPENAI_API_KEY` to your environment or create .env file.
-Second option is to pass api key to the script (you will be asked).
-
-
-
-Run `scraperai --help` to get help.
-
-### Jupyter notebook
+Follow the interactive process as ScraperAI attempts to auto-detect page types, pagination, catalog cards and data fields, 
+allowing for manual correction of its detections.
+The CLI currently supports only the OpenAI chat model, requiring an `openai_api_key`. 
+It can be provided via an environment variable, a `.env` file, or directly to the script.
 
 
-## Usage
+Use `scraperai --help`  for assistance.
 
+# Roadmap
+Our vision for ScraperAI's future includes:
+- Add cache layer
+- Improve reciepts & prompts
+- Release SaaS web app
+- Improve prompts
+- Add support of different LLMs
+- Add [gpt4all](https://github.com/nomic-ai/gpt4all) integration
+- Add anti-captcha integration 
+
+We welcome feature requests and ideas from our community.
 
 # Contributing
-Contributions are welcome! Please feel free to open a pull request or an issue.
+Your contributions are highly appreciated! Feel free to submit pull requests or issues.
