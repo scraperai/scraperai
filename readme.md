@@ -39,7 +39,7 @@ pip install ./scraperai
 
 ### Features
 
-#### Page type detection
+#### Page Type Detector
 
 Web pages are categorized into four types:
 
@@ -50,27 +50,29 @@ Web pages are categorized into four types:
 
 ScraperAI primarily uses page screenshots and the GPT-4 Vision model for page type determination, with a fallback algorithm for cases where screenshots or Vision model access is unavailable. Users can manually set the page type if known.
 
-#### Pagination detection
+#### Pagination Detector
 This feature is applicable for catalog-type web pages, supporting:
 
 - `xpath`: Xpath of pagination buttons like "Next page", "More", etc.
 - `scroll`: Infinite scrolling.
 - `url_param`: URL parameter-based pagination (e.g., `website.com/?page=1`).
 
-#### Catalog item detection
-This feature is applicable only for catalog-type web pages.
+#### Catalog Item Detector
+This feature is specifically designed for catalog-type web pages. It identifies repeating elements that typically 
+represent individual data items, such as products, articles, or companies. 
+These elements may appear as visually distinct cards or as rows within a table, facilitating the organized display of information.
 
+#### Fields Extractor
 
-#### Fields extractor
-
-Fields extractor allows to detect relevant information on the page and then find XPATHs that allows to select detected information.
-
+The Fields Extractor allows to detect relevant information on the page and then 
+find XPATHs that allows to extract this detected information efficiently.
+This tool can be used to retrieve information from individual catalog item cards or from nested detailing pages.
 We define two types of data fields within HTML page:
 
 - **Static fields:** Fields without explicit names, containing single or multiple values (e.g., product names or prices).
 - **Dynamic fields:** Fields with both names and values, typically formatted like table entries.
 
-#### WebCrawler
+#### Web Crawler
 Our WebCrawler is engineered to:
 
 - Access web pages.
