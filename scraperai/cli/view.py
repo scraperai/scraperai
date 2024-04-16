@@ -17,13 +17,13 @@ class View:
     
     def show_api_key_screen(self, status: ScreenStatus) -> tuple[str, bool] | None:
         if status == ScreenStatus.loading:
-            click.echo('Searching for OPENAI_API_KEY')
+            click.echo('Searching for openai api key')
         elif status == ScreenStatus.show:
-            click.echo('Found OPENAI_API_KEY')
+            click.echo('Successfully found openai api key')
         elif status == ScreenStatus.edit:
             click.echo('OPENAI_API_KEY was not found in environment')
-            api_key = click.prompt('Enter your openai token')
-            should_save = click.confirm('Do you want to save token in local .env?', default=True)
+            api_key = click.prompt('Enter your openai api key')
+            should_save = click.confirm('Do you want to save key in local .env?', default=True)
             return api_key, should_save
 
     def show_page_type_screen(self, status: ScreenStatus, page_type: WebpageType = None) -> WebpageType | None:
