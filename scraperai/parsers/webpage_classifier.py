@@ -1,4 +1,3 @@
-import enum
 from typing import Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -6,7 +5,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from scraperai.parsers.agent import ChatModelAgent
 from scraperai.models import WebpageType
 from scraperai.utils.image import encode_image_to_b64
-from scraperai.lm.base import BaseLM, BaseVision
+from scraperai.lm.base import BaseVision, BaseJsonLM
 
 
 class WebpageVisionClassifier(ChatModelAgent):
@@ -51,7 +50,7 @@ Return only category name in the answer.
 
 
 class WebpageTextClassifier:
-    def __init__(self, model: BaseLM):
+    def __init__(self, model: BaseJsonLM):
         self.model = model
 
     def classify(self, html_content: str) -> WebpageType:

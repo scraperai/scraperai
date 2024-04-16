@@ -3,14 +3,14 @@ from typing import Callable, Any, Optional
 
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
-from scraperai.lm import BaseLM, BaseJsonLM, BaseVision
+from scraperai.lm import BaseJsonLM, BaseVision
 
 
 logger = logging.getLogger('scraperai')
 
 
 class ChatModelAgent:
-    def __init__(self, model: BaseLM | BaseJsonLM | BaseVision):
+    def __init__(self, model: BaseJsonLM | BaseVision):
         self.model = model
 
     def query_with_validation(self,

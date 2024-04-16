@@ -1,7 +1,7 @@
 import unittest
 
 from scraperai.crawlers import SeleniumCrawler, RequestsCrawler
-from scraperai.lm.openai import OpenAI, JsonOpenAI
+from scraperai.lm.openai import JsonOpenAI
 from scraperai.parsers import CatalogItemDetector
 from scraperai.parsers.pagination_detector import Pagination, PaginationDetector
 from .settings import OPENAI_API_KEY, default_webmanager

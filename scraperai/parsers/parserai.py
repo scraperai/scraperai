@@ -1,7 +1,7 @@
 import logging
 
-from scraperai.lm.base import BaseLM, BaseVision
-from scraperai.lm.openai import OpenAI, JsonOpenAI, VisionOpenAI
+from scraperai.lm.base import BaseVision
+from scraperai.lm.openai import JsonOpenAI, VisionOpenAI
 from scraperai.parsers import (
     PaginationDetector,
     WebpageVisionClassifier,
@@ -11,7 +11,7 @@ from scraperai.parsers import (
     CatalogItemDetector,
     DataFieldsExtractor
 )
-from scraperai.models import WebpageFields, CatalogItem, Pagination, WebpageType, ScraperConfig
+from scraperai.models import WebpageFields, CatalogItem, Pagination, WebpageType
 from scraperai.utils import fix_relative_url
 from scraperai.utils.image import compress_b64_image
 
@@ -20,15 +20,10 @@ logger = logging.getLogger('scraperai')
 
 class ParserAI:
     def __init__(self,
-                 lm_model: BaseLM = None,
                  json_lm_model: JsonOpenAI = None,
                  vision_model: BaseVision = None,
                  openai_api_key: str = None,
                  openai_organization: str = None):
-        if lm_model is None:
-            self.lm_model = OpenAI(openai_api_key, openai_organization, temperature=0)
-        else:
-            self.lm_model = lm_model
 
         if json_lm_model is None:
             self.json_lm_model = JsonOpenAI(openai_api_key, openai_organization, temperature=0)
@@ -43,8 +38,6 @@ class ParserAI:
     @property
     def total_cost(self) -> float:
         cost = 0.0
-        if isinstance(self.lm_model, OpenAI):
-            cost += self.lm_model.total_cost
         if isinstance(self.json_lm_model, JsonOpenAI):
             cost += self.json_lm_model.total_cost
         if isinstance(self.vision_model, VisionOpenAI):
@@ -56,7 +49,7 @@ class ParserAI:
             screenshot = compress_b64_image(screenshot, aspect_ratio=0.5)
             return WebpageVisionClassifier(model=self.vision_model).classify(screenshot)
         elif page_source is not None:
-            return WebpageTextClassifier(model=self.lm_model).classify(page_source)
+            return WebpageTextClassifier(model=self.json_lm_model).classify(page_source)
         else:
             raise ValueError('One of page_source, screenshot must not be None')
 
