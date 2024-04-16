@@ -7,7 +7,7 @@ from pydantic import BaseModel, ValidationError
 
 from scraperai.lm.base import BaseJsonLM
 from scraperai.parsers.agent import ChatModelAgent
-from scraperai.parsers.models import StaticField, WebpageFields, DynamicField
+from scraperai.models import StaticField, WebpageFields, DynamicField
 from scraperai.parsers.utils import build_validation_error_message
 from scraperai.utils.html import minify_html, extract_field_by_xpath, extract_dynamic_fields_by_xpath
 

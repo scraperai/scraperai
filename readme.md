@@ -111,7 +111,7 @@ Use `scraperai --help`  for assistance.
 
 # Roadmap
 Our vision for ScraperAI's future includes:
-- Add cache layer
+- Add httpx and aiohttp crawlers
 - Improve reciepts & prompts
 - Release SaaS web app
 - Improve prompts

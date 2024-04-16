@@ -3,7 +3,7 @@ from typing import Any
 from lxml import html, etree
 from pydantic import ValidationError
 
-from scraperai.parsers.models import WebpageFields, StaticField
+from scraperai.models import WebpageFields, StaticField
 from scraperai.utils.html import extract_dynamic_fields_by_xpath, extract_field_by_xpath
 
 

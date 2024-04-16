@@ -26,4 +26,7 @@ tqdm
 retry
 Pillow
 pydantic
+
+# CLI
+appdirs
 click

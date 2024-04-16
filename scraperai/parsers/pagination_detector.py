@@ -6,7 +6,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 
 from scraperai.lm.base import BaseJsonLM
 from scraperai.parsers.agent import ChatModelAgent
-from scraperai.parsers.models import Pagination
+from scraperai.models import Pagination
 from scraperai.utils.html import minify_html
 from langchain_text_splitters import TokenTextSplitter
 

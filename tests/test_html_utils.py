@@ -1,6 +1,6 @@
 import unittest
 
-from scraperai.parsers.models import WebpageFields, StaticField, DynamicField
+from scraperai.models import WebpageFields, StaticField, DynamicField
 from scraperai.parsers.utils import extract_fields_from_html, extract_items
 from scraperai.utils.html import extract_dynamic_fields_by_xpath, minify_html
 from .settings import DATA_DIR

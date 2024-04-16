@@ -64,16 +64,15 @@ class WebpageType(str, enum.Enum):
 
     @classmethod
     def values_repr(cls) -> str:
-        return ', '.join([f'"{v.value}"' for v in cls])
+        return ', '.join([f'"{v}"' for v in cls])
 
 
-class ScrapingSummary(BaseModel):
+class ScraperConfig(BaseModel):
     start_url: str
-    page_type: WebpageType
+    page_type: Optional[WebpageType]
     pagination: Optional[Pagination]
     catalog_item: Optional[CatalogItem]
     open_nested_pages: bool
     fields: WebpageFields
     max_pages: int
     max_rows: int
-    total_cost: Optional[float]

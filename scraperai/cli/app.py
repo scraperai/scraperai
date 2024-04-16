@@ -3,6 +3,7 @@ import logging
 import click
 
 from scraperai.cli.controller import Controller
+from scraperai.cli.utils import validate_url
 
 
 def logging_option(func):
@@ -18,8 +19,17 @@ def logging_option(func):
                         help='Set the logging level')(func)
 
 
+def validate_url_input(ctx, param, value):
+    if validate_url(value):
+        return value
+    raise click.BadParameter("Invalid URL")
+
+
 @click.command()
-@click.option('--url', prompt='Enter url', help='url of the catalog or product page of any website')
+@click.option('--url',
+              prompt='Enter url',
+              help='url of the catalog or product page of any website',
+              callback=validate_url_input)
 @logging_option
 def main(url: str):
     """ScraperAI CLI Application
@@ -28,7 +38,6 @@ def main(url: str):
     The first is to add OPENAI_API_KEY to your environment or create .env file.
     Second option is to pass api key to the script (you will be asked).
     """
-
     app = Controller(url)
     try:
         app.run()

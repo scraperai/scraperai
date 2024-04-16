@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from urllib.parse import urlparse
 
 import click
 import pandas as pd
@@ -8,44 +9,46 @@ from dotenv import find_dotenv, load_dotenv
 
 from scraperai import BaseCrawler
 from scraperai.cli.model import ScreenStatus
-from scraperai.cli.utils import convert_ranges_to_indices, delete_fields_by_range, delete_field_by_name
+from scraperai.cli.utils import convert_ranges_to_indices, delete_fields_by_range, delete_field_by_name, DATA_DIR
 from scraperai.cli.view import View
 from scraperai.exceptions import NotFoundError
-from scraperai.parsers import WebpageType, Pagination
-from scraperai.parsers.models import CatalogItem, WebpageFields, ScrapingSummary
+from scraperai.models import CatalogItem, WebpageFields, ScraperConfig, WebpageType
 from scraperai import ParserAI
 from scraperai.crawlers import SeleniumCrawler
+from scraperai.scraper import Scraper
 
 
 class Controller:
     crawler: BaseCrawler = None
     parser: ParserAI = None
-    page_type: WebpageType = None
-    pagination: Pagination = None
-    catalog_item: CatalogItem = None
-    fields: WebpageFields = None
-    open_nested_pages: bool = False
-    max_pages: int = 1
-    max_rows: int = 1
     rows: list = []
 
     def __init__(self, start_url: str):
         self.start_url = start_url
+        self.config = ScraperConfig(
+            start_url=start_url,
+            page_type=None,
+            pagination=None,
+            catalog_item=None,
+            open_nested_pages=False,
+            fields=WebpageFields(static_fields=[], dynamic_fields=[]),
+            max_pages=1,
+            max_rows=1,
+            total_cost=None
+        )
         self.view = View()
 
-    @property
-    def summary_model(self) -> ScrapingSummary:
-        return ScrapingSummary(
-            start_url=self.start_url,
-            page_type=self.page_type,
-            pagination=self.pagination,
-            catalog_item=self.catalog_item,
-            open_nested_pages=self.open_nested_pages,
-            fields=self.fields,
-            max_pages=self.max_pages,
-            max_rows=self.max_rows,
-            total_cost=self.parser.total_cost
-        )
+    @staticmethod
+    def load_configs() -> list[ScraperConfig]:
+        all_dirs = [DATA_DIR, './']
+        files = []
+        for data_dir in all_dirs:
+            files += [os.path.join(data_dir, name) for name in os.listdir(data_dir) if name.endswith('.scraperai.json')]
+        configs = []
+        for filepath in files:
+            with open(filepath, 'r') as f:
+                configs.append(ScraperConfig(**json.load(f)))
+        return configs
 
     def init_crawler(self):
         click.echo('Starting webdriver...')
@@ -61,21 +64,26 @@ class Controller:
         if openai_api_key is not None:
             self.view.show_api_key_screen(status=ScreenStatus.show)
         else:
-            openai_api_key = self.view.show_api_key_screen(status=ScreenStatus.edit)
-
+            openai_api_key, should_save = self.view.show_api_key_screen(status=ScreenStatus.edit)
+            if should_save:
+                with open('.env', 'w+') as f:
+                    f.write(f'OPENAI_API_KEY={openai_api_key}')
         self.parser = ParserAI(openai_api_key=openai_api_key)
 
     def detect_page_type(self):
         self.view.show_page_type_screen(status=ScreenStatus.loading)
         self.crawler.get(self.start_url)
+        screenshot = None
+        if isinstance(self.crawler, SeleniumCrawler):
+            screenshot = self.crawler.get_screenshot_as_base64()
         page_type = self.parser.detect_page_type(
             page_source=self.crawler.page_source,
-            screenshot=self.crawler.get_screenshot_as_base64()
+            screenshot=screenshot
         )
         self.view.show_page_type_screen(status=ScreenStatus.show, page_type=page_type)
 
         page_type = self.view.show_page_type_screen(status=ScreenStatus.edit, page_type=page_type)
-        self.page_type = page_type
+        self.config.page_type = page_type
 
     def detect_pagination(self):
         self.view.show_pagination_screen(status=ScreenStatus.loading)
@@ -83,9 +91,9 @@ class Controller:
         pagination = self.parser.detect_pagination(page_source=self.crawler.page_source)
         self.view.show_pagination_screen(status=ScreenStatus.show, pagination=pagination)
         pagination = self.view.show_pagination_screen(status=ScreenStatus.edit, pagination=pagination)
-        self.pagination = pagination
+        self.config.pagination = pagination
 
-    def detect_catalog_item(self, extra_prompt: str = None, catalog_item: CatalogItem = None) -> CatalogItem:
+    def detect_catalog_item(self, extra_prompt: str = None, catalog_item: CatalogItem = None):
         self.view.show_card_screen(status=ScreenStatus.loading)
         if catalog_item is None:
             try:
@@ -120,8 +128,7 @@ class Controller:
 
         if catalog_item is None:
             self.quit('Could not find catalog item. Aborting...')
-        self.catalog_item = catalog_item
-        return catalog_item
+        self.config.catalog_item = catalog_item
 
     def _highlight_fields(self, fields: WebpageFields):
         if not isinstance(self.crawler, SeleniumCrawler):
@@ -140,9 +147,12 @@ class Controller:
         self.view.show_fields_screen(status=ScreenStatus.loading)
         if nested_page_url is not None:
             self.crawler.get(nested_page_url)
+            screenshot = None
+            if isinstance(self.crawler, SeleniumCrawler):
+                screenshot = self.crawler.get_screenshot_as_base64()
             html_snippet = self.parser.summarize_details_page_as_valid_html(
                 page_source=self.crawler.page_source,
-                screenshot=self.crawler.get_screenshot_as_base64()
+                screenshot=screenshot
             )
             fields = self.parser.extract_fields(html_snippet)
         elif html_snippet is not None:
@@ -179,50 +189,40 @@ class Controller:
                 else:
                     self.view.show_fields_screen(status=ScreenStatus.show, not_found_message='No such field')
 
-        self.fields = fields
+        self.config.fields = fields
 
     def scrape(self):
-        if self.page_type == WebpageType.OTHER:
+        scraper = Scraper(self.config, self.crawler)
+        if self.config.page_type == WebpageType.OTHER:
             self.quit('Unsupported page type. Aborting...')
             return
-        elif self.page_type == WebpageType.DETAILS:
+        elif self.config.page_type == WebpageType.DETAILS:
             rows = []
-            for row in self.crawler.iter_data_from_nested_pages([self.start_url], self.fields):
+            for row in scraper.scrape_nested_items([self.start_url]):
                 rows.append(row)
         else:
-            if self.open_nested_pages:
+            if self.config.open_nested_pages:
                 urls: set[str] = set()
-
-                urls_iterator = self.crawler.iter_urls_to_nested_pages(
-                    self.start_url,
-                    self.pagination,
-                    self.catalog_item.url_xpath,
-                    self.max_pages
-                )
-                with View.progressbar(length=self.max_pages, label='Collecting nested urls') as bar:
-                    for url_list in urls_iterator:
-                        urls.update(url_list)
+                with View.progressbar(iterable=scraper.scrape_nested_items_urls(),
+                                      length=self.config.max_rows,
+                                      label='Collecting nested urls') as bar:
+                    for url in bar:
+                        urls.add(url)
                         bar.update(1)
                 click.echo(f'Collected {len(urls)} urls to nested pages')
                 rows = []
-                data_iterator = self.crawler.iter_data_from_nested_pages(urls, self.fields, self.max_rows)
-                with View.progressbar(data_iterator, length=self.max_rows, label='Scraping nested pages') as bar:
+                with View.progressbar(iterable=scraper.scrape_nested_items(urls),
+                                      length=self.config.max_rows,
+                                      label='Scraping nested pages') as bar:
                     for row in bar:
                         rows.append(row)
             else:
                 rows = []
-                data_iterator = self.crawler.iter_data_from_catalog_pages(
-                    self.start_url,
-                    self.pagination,
-                    self.catalog_item.card_xpath,
-                    self.fields,
-                    self.max_pages,
-                    self.max_rows
-                )
-                with View.progressbar(length=self.max_rows, label='Scraping catalog pages') as bar:
-                    for data_list in data_iterator:
-                        rows += data_list
-                        bar.update(len(data_list))
+                with View.progressbar(iterable=scraper.scrape_catalog_items(),
+                                      length=self.config.max_rows,
+                                      label='Scraping catalog pages') as bar:
+                    for row in bar:
+                        rows.append(row)
 
         self.rows = rows
 
@@ -260,32 +260,58 @@ class Controller:
         # Step 2: Get openai token and init scraper
         self.init_scraper()
 
-        # Step 3: Detect page type
-        self.detect_page_type()
+        # Step 3: Search for existing configs
+        configs = self.load_configs()
+        print(f'Found {len(configs)} configs in Directory {DATA_DIR}')
+        loaded_from_memory = False
+        for config in configs:
+            if config.start_url == self.start_url:
+                should_use = self.view.show_configs_search_screen(config)
+                if should_use:
+                    loaded_from_memory = True
+                    self.config = config
+                    break
 
-        if self.page_type == WebpageType.CAPTCHA:
-            self.view.show_captcha_warning()
-        elif self.page_type == WebpageType.CATALOG:
-            # Step 4: Detect pagination
-            self.detect_pagination()
-            # Step 5: Detect catalog item
-            self.detect_catalog_item()
-            # Step 6: Detect fields
-            self.open_nested_pages = self.view.show_open_nested_pages_screen()
-            if self.open_nested_pages:
-                self.detect_fields(nested_page_url=self.catalog_item.urls_on_page[0])
+        # Step 4: Detect page type
+        if not loaded_from_memory:
+            while self.config.page_type is None or self.config.page_type == WebpageType.CAPTCHA:
+                self.detect_page_type()
+                if self.config.page_type == WebpageType.OTHER:
+                    self.quit(f'Unsupported page type {self.config.page_type}. Aborting...')
+                if self.config.page_type == WebpageType.CAPTCHA:
+                    if not self.view.show_captcha_warning():
+                        self.quit()
+
+            if self.config.page_type == WebpageType.CATALOG:
+                # Step 5: Detect pagination
+                self.detect_pagination()
+                # Step 6: Detect catalog item
+                self.detect_catalog_item()
+                # Step 7: Detect fields
+                self.config.open_nested_pages = self.view.show_open_nested_pages_screen()
+                if self.config.open_nested_pages:
+                    self.detect_fields(nested_page_url=self.config.catalog_item.urls_on_page[0])
+                else:
+                    self.detect_fields(html_snippet=self.config.catalog_item.html_snippet)
             else:
-                self.detect_fields(html_snippet=self.catalog_item.html_snippet)
+                # Step 7: Detect fields
+                self.detect_fields(nested_page_url=self.start_url)
 
-            # Step 7: Ask for limits
-            self.max_pages, self.max_rows = self.view.show_limits_screen()
-        elif self.page_type == WebpageType.DETAILS:
-            self.detect_fields(nested_page_url=self.start_url)
-        else:
-            self.quit(f'Unsupported page type {self.page_type}. Aborting...')
+        # Step 8: Ask for limits
+        if self.config.page_type == WebpageType.CATALOG:
+            max_pages, max_rows = self.view.show_limits_screen()
+            self.config.max_rows = max_rows
+            self.config.max_pages = max_pages
 
         # Step 8: Scraping all pages accroding to the task
-        self.view.show_summary_screen(self.summary_model)
+        self.view.show_config_screen(self.config, self.parser.total_cost)
+        should_save_config = self.view.show_config_save_screen()
+        if should_save_config:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            name = urlparse(self.config.start_url).netloc
+            filename = f'{name}_{timestamp}.scraperai.json'
+            with open(filename, 'w+') as f:
+                f.write(self.config.model_dump_json())
         self.scrape()
         self.export_results()
         self.quit('Thank you for using ScraperAI!')

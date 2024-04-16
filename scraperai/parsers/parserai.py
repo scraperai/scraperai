@@ -4,15 +4,14 @@ from scraperai.lm.base import BaseLM, BaseVision
 from scraperai.lm.openai import OpenAI, JsonOpenAI, VisionOpenAI
 from scraperai.parsers import (
     PaginationDetector,
-    Pagination,
-    WebpageType,
     WebpageVisionClassifier,
     WebpageTextClassifier,
     WebpagePartsDescriptor,
     WebpageVisionDescriptor,
-    CatalogItemDetector, DataFieldsExtractor
+    CatalogItemDetector,
+    DataFieldsExtractor
 )
-from scraperai.parsers.models import WebpageFields, CatalogItem
+from scraperai.models import WebpageFields, CatalogItem, Pagination, WebpageType, ScraperConfig
 from scraperai.utils import fix_relative_url
 from scraperai.utils.image import compress_b64_image
 
@@ -91,7 +90,7 @@ class ParserAI:
         else:
             description = None
 
-        # Split html into prieces, describe each piece, mark pieces as relevant/irrelevant,
+        # Split html into pieces, describe each piece, mark pieces as relevant/irrelevant,
         # remove irrelevant pieces and return new html
         parts_descriptor = WebpagePartsDescriptor(model=self.json_lm_model)
         return parts_descriptor.find_and_remove_irrelevant_html_parts(page_source, context=description)

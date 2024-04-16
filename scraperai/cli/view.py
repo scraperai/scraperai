@@ -4,22 +4,27 @@ import click
 import pandas as pd
 
 from scraperai.cli.model import ScreenStatus, CardEditFormModel, FieldsEditFormModel
-from scraperai.parsers import WebpageType, Pagination
-from scraperai.parsers.models import CatalogItem, WebpageFields
-from scraperai.parsers.models import ScrapingSummary
+from scraperai.models import CatalogItem, WebpageFields, WebpageType, Pagination, ScraperConfig
 
 
 class View:
     progressbar = click.progressbar
 
-    def show_api_key_screen(self, status: ScreenStatus) -> str | None:
+    def show_configs_search_screen(self, config: ScraperConfig) -> bool:
+        click.echo(f'Found stored config for start_url={config.start_url}')
+        self.show_config_screen(config, show_limits=False)
+        return click.confirm(f'Do you want to use it?', default=True)
+    
+    def show_api_key_screen(self, status: ScreenStatus) -> tuple[str, bool] | None:
         if status == ScreenStatus.loading:
             click.echo('Searching for OPENAI_API_KEY')
         elif status == ScreenStatus.show:
             click.echo('Found OPENAI_API_KEY')
         elif status == ScreenStatus.edit:
             click.echo('OPENAI_API_KEY was not found in environment')
-            return click.prompt('Enter your openai token')
+            api_key = click.prompt('Enter your openai token')
+            should_save = click.confirm('Do you want to save token in local .env?', default=True)
+            return api_key, should_save
 
     def show_page_type_screen(self, status: ScreenStatus, page_type: WebpageType = None) -> WebpageType | None:
         if status == ScreenStatus.loading:
@@ -36,9 +41,9 @@ class View:
                 page_type = WebpageType(new_type)
         return page_type
 
-    def show_captcha_warning(self):
+    def show_captcha_warning(self) -> bool:
         click.echo('Captcha detected! Please solve it before we can continue')
-        click.confirm('Press enter to continue', default=True)
+        return click.confirm('Do you wish to retry?', default=True)
 
     def show_pagination_screen(self,
                                status: ScreenStatus,
@@ -152,24 +157,29 @@ class View:
         max_rows = click.prompt('Enter rows limit', type=int, default=50)
         return max_pages, max_rows
 
-    def show_summary_screen(self, summary: ScrapingSummary) -> None:
-        if summary.catalog_item:
-            catalog_item = f'(card_xpath={summary.catalog_item.card_xpath}, url_xpath={summary.catalog_item.url_xpath})'
+    def show_config_screen(self, config: ScraperConfig,
+                           total_cost: float = None,
+                           show_limits: bool = True) -> None:
+        if config.catalog_item:
+            catalog_item = f'(card_xpath={config.catalog_item.card_xpath}, url_xpath={config.catalog_item.url_xpath})'
         else:
-            catalog_item = "-"
-        click.echo(f'\n'
-                   f'Parsing summary:\n'
-                   f' - Start url: {summary.start_url}\n'
-                   f' - Start page type: {summary.page_type}\n'
-                   f' - Pagination: {summary.pagination or "-"}\n'
-                   f' - Catalog item: {catalog_item}\n'
-                   f' - Open nested pages: {summary.open_nested_pages}\n'
-                   f' - Fields: {len(summary.fields.static_fields)} static, {len(summary.fields.dynamic_fields)} dynamic\n'
-                   f' - Max pages: {summary.max_pages}\n'
-                   f' - Max rows: {summary.max_rows}\n'
-                   f' - Total OpenAI cost, $: {summary.total_cost:.3f}\n')
-        click.confirm('Press enter to start scraping', default=True)
-        click.echo('Starting scraping...')
+            catalog_item = '-'
+        text = f'Scraper Config:\n'
+        text += f' - Start url: {config.start_url}\n'
+        text += f' - Start page type: {config.page_type}\n'
+        text += f' - Pagination: {config.pagination or "-"}\n'
+        text += f' - Catalog item: {catalog_item}\n'
+        text += f' - Open nested pages: {config.open_nested_pages}\n'
+        text += f' - Fields: {len(config.fields.static_fields)} static, {len(config.fields.dynamic_fields)} dynamic\n'
+        if show_limits:
+            text += f' - Max pages: {config.max_pages}\n'
+            text += f' - Max rows: {config.max_rows}\n'
+        if total_cost:
+            text += f' - Total OpenAI cost, $: {total_cost:.3f}\n'
+        click.echo(text)
+
+    def show_config_save_screen(self) -> bool:
+        return click.confirm('Do you want to save config to reuse in future?', default=True)
 
     def show_export_screen(self,
                            status: ScreenStatus,

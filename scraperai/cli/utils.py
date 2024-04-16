@@ -1,6 +1,13 @@
+import os
 import re
 
-from scraperai.parsers.models import WebpageFields
+import appdirs
+
+from scraperai.models import WebpageFields
+
+
+DATA_DIR = appdirs.user_data_dir(appname='scraperai', appauthor='scraperai')
+os.makedirs(DATA_DIR, exist_ok=True)
 
 
 def convert_ranges_to_indices(input_str: str) -> set[int]:
@@ -54,3 +61,8 @@ def delete_fields_by_range(fields: WebpageFields, range_to_delete: set[int]) -> 
             fields.dynamic_fields.pop(index - offset_index)
             deleted = True
     return deleted
+
+
+def validate_url(url: str) -> bool:
+    pattern = re.compile(r'^https?://(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:/.*)?$')
+    return bool(pattern.match(url))
