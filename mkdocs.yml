@@ -12,10 +12,11 @@ theme:
 nav:
   - Introduction: index.md
   - Getting Started: getting-started.md
-  - LLMs:
+  - Main Components:
       - llms.md
-  - Crawlers:
       - crawlers.md
+      - parser.md
+      - scraper.md
   - CLI:
       - cli.md
   - Examples:

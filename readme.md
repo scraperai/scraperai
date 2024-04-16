@@ -23,6 +23,18 @@ ScraperAI is an open-source, AI-powered tool designed to simplify web scraping f
 By leveraging Large Language Models, such as ChatGPT, ScraperAI extracts data from web pages and generates 
 reusable and shareable scraping recipes.
 
+### Features
+- Serializable & reusable Scraper Configs
+- Automatic data detection
+- Automatic XPATHs detection
+- Automatic pagination & page type detection
+- HTML minification
+- ChatGPT support
+- Custom LLMs support
+- Selenium support
+- Custom crawlers support
+
+
 ### Installation
 
 Install ScraperAI easily using pip or from the source.
@@ -37,7 +49,7 @@ git clone https://github.com/scraperai/scraperai.git
 pip install ./scraperai
 ```
 
-### Features
+### Getting Started
 
 #### Page Type Detector
 
@@ -105,7 +117,6 @@ Follow the interactive process as ScraperAI attempts to auto-detect page types, 
 allowing for manual correction of its detections.
 The CLI currently supports only the OpenAI chat model, requiring an `openai_api_key`. 
 It can be provided via an environment variable, a `.env` file, or directly to the script.
-
 
 Use `scraperai --help`  for assistance.
 
