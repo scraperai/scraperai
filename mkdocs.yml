@@ -1,0 +1,36 @@
+site_name: ScraperAI
+site_url: https://docs.scraper-ai.com
+repo_url: https://github.com/scraperai/scraperai
+edit_uri: https://github.com/scraperai/scraperai/blob/main/docs/
+site_description: ScraperAI is an open-source, AI-powered tool designed to simplify web scraping for users of all skill levels.
+site_author: Iakov Kaiumov
+
+theme:
+  name: readthedocs
+  highlightjs: true
+
+nav:
+  - Introduction: index.md
+  - Getting Started: getting-started.md
+  - LLMs:
+      - llms.md
+  - Crawlers:
+      - crawlers.md
+  - CLI:
+      - cli.md
+  - Examples:
+      - examples.md
+extra:
+  version: "0.0.2"
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        # See: https://mkdocstrings.github.io/python/usage/
+        python:
+          options:
+            docstring_style: google
+markdown_extensions:
+  - markdown_include.include:
+      base_path: .
+  - admonition

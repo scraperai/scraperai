@@ -28,11 +28,11 @@ reusable and shareable scraping recipes.
 Install ScraperAI easily using pip or from the source.
 
 With pip:
-```bash
+```console
 pip install scraperai
 ```
 From source: 
-```bash
+```console
 git clone https://github.com/scraperai/scraperai.git
 pip install ./scraperai
 ```
@@ -93,11 +93,11 @@ In this notebook we present two expirements:
 
 ### CLI Application
 ScraperAI has a built-in CLI application. Simply run:
-```bash
+```console
 scraperai --url https://www.ycombinator.com/companies
 ```
 or simply
-```bash
+```console
 scraperai
 ```
 
