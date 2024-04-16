@@ -13,7 +13,7 @@ from scraperai.models import CatalogItem
 from scraperai.parsers.utils import build_validation_error_message
 from scraperai.utils.html import minify_html
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class CatalogItemResponseModel(BaseModel):

@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from scraperai.lm.base import BaseLM, BaseJsonLM, _Dict, _DictOrPydanticClass, BaseVision
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class OpenAI(BaseLM):

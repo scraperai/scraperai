@@ -15,7 +15,7 @@ from scraperai.models import WebpageFields, CatalogItem, Pagination, WebpageType
 from scraperai.utils import fix_relative_url
 from scraperai.utils.image import compress_b64_image
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class ParserAI:

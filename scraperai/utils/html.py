@@ -9,7 +9,7 @@ from lxml import html, etree
 from pydantic import BaseModel
 from tiktoken import Encoding
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 BAD_TAGS = {
     'script', 'style', 'meta', 'noscript', 'footer', 'header'
@@ -31,7 +31,7 @@ def minify_html(html_content: str,
 
     # Remove spaces and new lines
     html_content = htmlmin.minify(str(BeautifulSoup(html_content, "html.parser")), remove_empty_space=True)
-    logger.info(f'Initial HTML length: {len(html_content)}')
+    logger.debug(f'Initial HTML length: {len(html_content)}')
     # Remove bad tags
     soup = BeautifulSoup(html_content, "html.parser")
     for tag in bad_tags:
@@ -60,7 +60,7 @@ def minify_html(html_content: str,
         for tag in soup.find_all():
             if tag.text.strip() == '':
                 tag.extract()
-    logger.info(f'Final html length: {len(str(soup))}')
+    logger.debug(f'Final html length: {len(str(soup))}')
     return str(soup), substituions
 
 

@@ -6,7 +6,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from scraperai.lm import BaseLM, BaseJsonLM, BaseVision
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class ChatModelAgent:
@@ -19,7 +19,7 @@ class ChatModelAgent:
                               max_retries: int = 3,
                               current_try: int = 0) -> Any:
         response = self.model.invoke(messages)
-        # logger.info(f'Got response: {response}')
+        logger.debug(f'Got response: {response}')
         try:
             new_error_message = validator(response)
         except Exception:

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from scraperai.models import Pagination
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class BaseCrawler(ABC):

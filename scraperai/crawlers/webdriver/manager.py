@@ -9,7 +9,7 @@ import requests
 from .remote import RemoteWebdriver
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class TooManySessions(Exception):

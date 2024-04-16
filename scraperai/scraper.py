@@ -8,7 +8,7 @@ from scraperai.models import ScraperConfig, WebpageType
 from scraperai.parsers.utils import extract_fields_from_html, extract_fields_from_tree
 from scraperai.utils import fix_relative_url
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class Scraper:
@@ -48,7 +48,7 @@ class Scraper:
                 yield data
 
             total_count += count
-            logger.info(f'Page: {page_number}: Found {count} new items')
+            logger.debug(f'Page: {page_number}: Found {count} new items')
 
             success = self.crawler.switch_page(self.config.pagination)
             if not success:

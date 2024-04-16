@@ -4,7 +4,7 @@ from selenium.common import JavascriptException
 from selenium.webdriver.remote.webdriver import WebDriver
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 def highlight_by_xpath(driver: WebDriver, xpath: str, color: str, border: int):

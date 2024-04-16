@@ -262,7 +262,6 @@ class Controller:
 
         # Step 3: Search for existing configs
         configs = self.load_configs()
-        print(f'Found {len(configs)} configs in Directory {DATA_DIR}')
         loaded_from_memory = False
         for config in configs:
             if config.start_url == self.start_url:

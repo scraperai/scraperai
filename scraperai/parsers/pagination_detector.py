@@ -11,7 +11,7 @@ from scraperai.utils.html import minify_html
 from langchain_text_splitters import TokenTextSplitter
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('scraperai')
 
 
 class PaginationDetector(ChatModelAgent):
