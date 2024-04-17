@@ -1,3 +1,11 @@
+# ML
+langchain==0.1.16
+langchain_community
+langchain_openai
+langchain_text_splitters
+openai
+tiktoken
+
 # Parsing
 htmlmin
 requests
@@ -5,14 +13,6 @@ beautifulsoup4
 lxml
 selenium==4.9.1
 webdriver-manager
-
-# ML
-openai
-tiktoken
-langchain==0.1.16
-langchain_community
-langchain_openai
-langchain_text_splitters
 
 # Data
 numpy==1.26.4
