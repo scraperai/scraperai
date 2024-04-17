@@ -1,6 +1,6 @@
 <p align="center">
   <picture>
-    <img alt="ScraperAI Logo" height="150px" src="images/logo.png">
+    <img alt="ScraperAI Logo" height="150px" src="https://raw.githubusercontent.com/scraperai/scraperai/main/images/logo.png">
   </picture>
 </p>
 <h1 align="center">
@@ -13,6 +13,9 @@
   <a href="https://docs.scraper-ai.com">Documentation</a> |
   <a href="https://scraper-ai.com">Website</a>
 </h4>
+
+[![pages-build-deployment](https://github.com/scraperai/scraperai/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/scraperai/scraperai/actions/workflows/pages/pages-build-deployment)
+[![Publish to pypi](https://github.com/scraperai/scraperai/actions/workflows/cd.yml/badge.svg)](https://github.com/scraperai/scraperai/actions/workflows/cd.yml)
 
 ## What is ScraperAI
 
