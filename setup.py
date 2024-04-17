@@ -12,7 +12,7 @@ requirements = [line for line in REQUIREMENTS_DIR.read_text().split('\n') if lin
 
 setup(
     name='scraperai',
-    version='0.0.1',
+    version='0.0.2',
     description='AI scraping util',
     url='https://github.com/scraperai/scraperai',
     author='Iakov Kaiumov',
