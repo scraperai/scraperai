@@ -9,13 +9,10 @@
 <p align="center">
     ⚡ Scraping has never been easier ⚡
 </p>
-
-<!--
 <h4 align="center">
   <a href="https://docs.scraper-ai.com">Documentation</a> |
   <a href="https://scraper-ai.com">Website</a>
 </h4>
--->
 
 ## What is ScraperAI
 
