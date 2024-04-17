@@ -1,4 +1,4 @@
-name: cd
+name: Publish to pypi
 
 on:
   release:
@@ -14,8 +14,15 @@ jobs:
     name: publish to pypi on new release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: JRubics/poetry-publish@v1.16
-        name: Build and publish to PyPI
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
+          python-version: '3.10'
+      - name: Setup environment, python and requirements
+        run: |
+          pip install setuptools wheel twine
+          python setup.py install
+      - name: Build and upload
+        run: |
+          python setup.py sdist bdist_wheel --dist-dir ddist/
+          python -m twine upload ddist/* -u __token__ -p ${{ secrets.TWINE_PASSWORD }}
