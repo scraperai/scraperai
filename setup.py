@@ -13,7 +13,7 @@ requirements = [line for line in REQUIREMENTS_DIR.read_text().split('\n') if lin
 setup(
     name='scraperai',
     version='0.0.2',
-    description='AI scraping util',
+    description='ScraperAI is an open-source, AI-powered tool designed to simplify web scraping for users of all skill levels.',
     url='https://github.com/scraperai/scraperai',
     author='Iakov Kaiumov',
     author_email='help@scraper-ai.com',

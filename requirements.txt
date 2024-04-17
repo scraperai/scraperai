@@ -9,13 +9,13 @@ webdriver-manager
 # ML
 openai
 tiktoken
-langchain
+langchain==0.1.16
 langchain_community
 langchain_openai
 langchain_text_splitters
 
 # Data
-numpy
+numpy==1.26.4
 pandas
 openpyxl
 tabulate
