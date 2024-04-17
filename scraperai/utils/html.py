@@ -90,7 +90,7 @@ def split_html(html_content: str, *,
                max_text_size: int = None,
                encoding: Encoding = None) -> list[HtmlPart]:
     if encoding is None:
-        encoding = tiktoken.encoding_for_model('gpt-4-0125-preview')
+        encoding = tiktoken.encoding_for_model('gpt-4-turbo-2024-04-09')
     if max_html_size is not None and max_text_size is not None:
         raise ValueError('One of max_html_size, max_text_size should be None')
     elif max_text_size is None and max_text_size is None:

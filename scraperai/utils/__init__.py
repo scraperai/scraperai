@@ -7,7 +7,7 @@ def cut_large_request(system_prompt: str,
                       max_tokens: int,
                       response_tokens: int,
                       step: float = 0.9) -> str:
-    encoding = tiktoken.encoding_for_model('gpt-4-0125-preview')
+    encoding = tiktoken.encoding_for_model('gpt-4-turbo-2024-04-09')
     fixed_size = len(encoding.encode(system_prompt)) + response_tokens
     available_size = max_tokens - fixed_size
     payload_size = len(encoding.encode(prompt))
