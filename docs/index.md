@@ -1,6 +1,6 @@
 <p align="center">
   <picture>
-    <img alt="ScraperAI Logo" height="150px" src="https://github.com/scraperai/scraperai/blob/main/images/logo.png?raw=true">
+    <img alt="ScraperAI Logo" height="150px" src="https://raw.githubusercontent.com/scraperai/scraperai/main/images/logo.png">
   </picture>
 </p>
 <h1 align="center">
