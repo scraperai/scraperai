@@ -14,7 +14,7 @@ jobs:
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
           CUSTOM_DOMAIN: docs.scraper-ai.com
           CONFIG_FILE: mkdocs.yml
           REQUIREMENTS: docs/requirements.in
