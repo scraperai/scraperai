@@ -6,7 +6,7 @@ from lxml import html, etree
 from scraperai import BaseCrawler
 from scraperai.models import ScraperConfig, WebpageType
 from scraperai.parsers.utils import extract_fields_from_html, extract_fields_from_tree
-from scraperai.utils import fix_relative_url
+from scraperai.utils.urls import fix_relative_url
 
 logger = logging.getLogger('scraperai')
 
