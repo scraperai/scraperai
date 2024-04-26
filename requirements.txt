@@ -11,7 +11,7 @@ tiktoken
 htmlmin
 requests
 beautifulsoup4
-lxml
+lxml>=5.0.0
 selenium==4.9.1
 webdriver-manager
 
