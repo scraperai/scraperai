@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_text_splitters import TokenTextSplitter
 from lxml import html
 from pydantic import BaseModel, ValidationError
 
@@ -26,6 +27,7 @@ class DataFieldsExtractor(ChatModelAgent):
     def __init__(self, model: BaseJsonLM):
         super().__init__(model)
         self.model = model
+        self.max_chunk_size = 16000
 
     def extract_static_fields(self, html_content: str, context: str = None) -> list[StaticField]:
         html_snippet, _ = minify_html(html_content, use_substituions=False)
@@ -47,9 +49,11 @@ Extract static data fields and present results as JSON with the following struct
 }
 ```
 If nothing found return empty array"""
+
+        html_part = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html_snippet)[0]
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=html_snippet),
+            HumanMessage(content=html_part),
         ]
         if context:
             messages.append(HumanMessage(content=context))

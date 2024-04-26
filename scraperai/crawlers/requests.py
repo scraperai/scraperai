@@ -2,7 +2,7 @@ import requests
 
 from scraperai.crawlers.base import BaseCrawler
 from scraperai.models import Pagination
-from scraperai.utils import get_url_query_param_value, add_or_replace_url_param
+from scraperai.utils.urls import get_url_query_param_value, add_or_replace_url_param
 
 
 class RequestsCrawler(BaseCrawler):

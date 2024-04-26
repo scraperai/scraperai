@@ -190,4 +190,3 @@ def extract_dynamic_fields_by_xpath(name_xpath: str,
         raise ValueError(f'Labels and values are of different size ({len(labels)} != {len(values)}) '
                          f'for name_xpath={name_xpath} value_xpath={value_xpath}')
     return {get_node_text(key).strip(): get_node_text(value).strip() for key, value in zip(labels, values)}
-

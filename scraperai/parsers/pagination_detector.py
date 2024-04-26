@@ -18,7 +18,7 @@ class PaginationDetector(ChatModelAgent):
     def __init__(self, model: BaseJsonLM):
         super().__init__(model)
         self.model = model
-        self.max_chunk_size = 24000
+        self.max_chunk_size = 12000
 
     def find_pagination(self, html: str):
         # TODO: Search for different pagination types
@@ -67,6 +67,8 @@ If nothing found, return:
 """
 
         html_parts = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
+        if len(html_parts) > 2:
+            html_parts = [html_parts[0], html_parts[-1]]
         classname = None
         for html_part in reversed(html_parts):
             messages = [
@@ -108,7 +110,8 @@ If nothing found, return:
 """
 
         html_parts = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(html)
-
+        if len(html_parts) > 2:
+            html_parts = [html_parts[0], html_parts[-1]]
         result = None
         for html_part in html_parts:
             messages = [

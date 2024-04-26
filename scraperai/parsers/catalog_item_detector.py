@@ -25,7 +25,7 @@ class CatalogItemDetector(ChatModelAgent):
     def __init__(self, model: BaseJsonLM):
         super().__init__(model)
         self.model = model
-        self.max_chunk_size = 32000
+        self.max_chunk_size = 16000
 
     def detect_catalog_item(self, html_content: str, extra_prompt: str = None) -> CatalogItem:
         compressed_html, subs = minify_html(html_content, good_attrs={'class', 'href'})

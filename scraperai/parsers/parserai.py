@@ -12,7 +12,7 @@ from scraperai.parsers import (
     DataFieldsExtractor
 )
 from scraperai.models import WebpageFields, CatalogItem, Pagination, WebpageType
-from scraperai.utils import fix_relative_url
+from scraperai.utils.urls import fix_relative_url
 from scraperai.utils.image import compress_b64_image
 
 logger = logging.getLogger('scraperai')
@@ -54,7 +54,11 @@ class ParserAI:
             raise ValueError('One of page_source, screenshot must not be None')
 
     def detect_pagination(self, page_source: str) -> Pagination:
-        return PaginationDetector(model=self.json_lm_model).find_pagination(page_source)
+        detector = PaginationDetector(model=self.json_lm_model)
+        try:
+            return detector.find_pagination(page_source)
+        except:
+            return Pagination(type='scroll')
 
     def detect_catalog_item(self, page_source: str, website_url: str, extra_prompt: str = None) -> CatalogItem | None:
         detector = CatalogItemDetector(model=self.json_lm_model)

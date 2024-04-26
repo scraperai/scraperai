@@ -9,7 +9,7 @@ from scraperai.crawlers.base import BaseCrawler
 from scraperai.crawlers.webdriver import utils
 from scraperai.crawlers.webdriver.local import DefaultChromeWebdriver
 from scraperai.models import Pagination
-from scraperai.utils import add_or_replace_url_param, get_url_query_param_value
+from scraperai.utils.urls import add_or_replace_url_param, get_url_query_param_value
 
 logger = logging.getLogger('scraperai')
 
