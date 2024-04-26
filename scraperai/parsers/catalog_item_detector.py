@@ -35,7 +35,7 @@ class CatalogItemDetector(ChatModelAgent):
 You are an HTML parser. You will be given an HTML page with a catalog or table. 
 Catalog elements or table's rows might be articles, projects, goods, companies, repositories and others.
 Your primary goal is to find classname of these elements. T
-his elements could be represented as li, div, article and other HTML tags.
+his elements could be represented as "a", "li", "div", "article" and other HTML tags.
 Each element must have a name and url.
 Your primary goal is to find xpath selectors to the catalog elements.
 It is better to use xpath with classname.

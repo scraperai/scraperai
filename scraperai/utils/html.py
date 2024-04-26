@@ -1,4 +1,6 @@
+import json
 import logging
+import re
 from typing import Any
 
 import htmlmin
@@ -190,3 +192,27 @@ def extract_dynamic_fields_by_xpath(name_xpath: str,
         raise ValueError(f'Labels and values are of different size ({len(labels)} != {len(values)}) '
                          f'for name_xpath={name_xpath} value_xpath={value_xpath}')
     return {get_node_text(key).strip(): get_node_text(value).strip() for key, value in zip(labels, values)}
+
+
+def extract_json_from_html(html_content: str, min_length: int = 100):
+    # Regular expression to find JSON objects
+    pattern = r'{[^{]*?}'
+
+    # Find all matches in the HTML
+    candidates = re.findall(pattern, html_content, re.DOTALL)
+
+    # Try to parse each candidate as JSON
+    extracted_jsons = []
+    for candidate in candidates:
+        if len(candidate) < min_length:
+            continue  # Skip JSON objects smaller than the minimum length
+
+        try:
+            parsed_json = json.loads(candidate)
+            extracted_jsons.append(parsed_json)
+        except json.JSONDecodeError as e:
+            # Skip over any candidate strings that are not valid JSON
+            continue
+    extracted_jsons.sort(key=lambda row: len(row))
+    return extracted_jsons[0] if extracted_jsons else None
+

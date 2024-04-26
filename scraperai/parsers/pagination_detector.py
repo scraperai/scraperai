@@ -35,7 +35,7 @@ class PaginationDetector(ChatModelAgent):
         :param html_content: webpage source
         :return: xpath to pagination button or None if not found
         """
-        # return self._find_xpath(html_content)
+        return self._find_xpath(html_content)
         # TODO: Add validation that xpath really exists in HTML
         chain_methods: list[Callable[[str], str]] = [self._find_pagination_classname, self._find_pagination_name]
         for method in chain_methods:
@@ -45,7 +45,6 @@ class PaginationDetector(ChatModelAgent):
         return None
 
     def _find_xpath(self, html_content: str) -> str | None:
-        initial_soup = BeautifulSoup(html_content, features='lxml')
         html_content, subs = minify_html(html_content, good_attrs={'class'})
 
         system_prompt = """You are an HTML parser. Your primary goal is to find pagination on the web page.
