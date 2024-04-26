@@ -12,7 +12,7 @@ from tiktoken import Encoding
 logger = logging.getLogger('scraperai')
 
 BAD_TAGS = {
-    'script', 'style', 'meta', 'noscript', 'footer', 'header'
+    'script', 'style', 'meta', 'noscript',
 }
 GOOD_ATTRS = {
     'class', 'id', 'name', 'href', 'text', 'src'
