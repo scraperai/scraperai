@@ -32,10 +32,12 @@ class CatalogItemDetector(ChatModelAgent):
         tree = html.fromstring(compressed_html)
 
         system_prompt = """
-You are an HTML parser. You will be given an HTML page with a catalog.
-Your primary goal is to find classname of these elements.
-The HTML contains a catalog of projects. Each element includes name, image, url.
-Your primary goal is to find xpath selectors of the catalog elements.
+You are an HTML parser. You will be given an HTML page with a catalog or table. 
+Catalog elements or table's rows might be articles, projects, goods, companies, repositories and others.
+Your primary goal is to find classname of these elements. T
+his elements could be represented as "a", "li", "div", "article" and other HTML tags.
+Each element must have a name and url.
+Your primary goal is to find xpath selectors to the catalog elements.
 It is better to use xpath with classname.
 The output should be a JSON dictionary like this:
 ```
@@ -79,6 +81,7 @@ If you have not found any relevant data return:
         card_xpath = data['card']
         url_xpath = data['url']
         if card_xpath is None or url_xpath is None:
+            print(card_xpath, url_xpath)
             raise NotFoundError
 
         html_snippet = etree.tostring(tree.xpath(card_xpath)[0],

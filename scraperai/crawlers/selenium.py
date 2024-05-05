@@ -4,6 +4,8 @@ import time
 import selenium
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver as BaseSeleniumWebDriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from scraperai.crawlers.base import BaseCrawler
 from scraperai.crawlers.webdriver import utils
@@ -37,10 +39,12 @@ class SeleniumCrawler(BaseCrawler):
         elem = self.driver.find_element(By.XPATH, xpath)
         elem.click()
 
-    def get_screenshot_as_base64(self) -> str:
-        self.driver.execute_script("document.body.style.zoom='60%'")
+    def get_screenshot_as_base64(self, zoom_out: bool = True) -> str:
+        if zoom_out:
+            self.driver.execute_script("document.body.style.zoom='60%'")
         screenshot = self.driver.get_screenshot_as_base64()
-        self.driver.execute_script("document.body.style.zoom='100%'")
+        if zoom_out:
+            self.driver.execute_script("document.body.style.zoom='100%'")
         return screenshot
 
     def highlight_by_xpath(self, xpath: str, color: str, border: int):

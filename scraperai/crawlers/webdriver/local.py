@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.chrome.options import Options
@@ -29,6 +31,9 @@ class DefaultChromeWebdriver(webdriver.Chrome, BaseWebdriver):
         # Turn-off userAutomationExtension
         options.add_experimental_option("useAutomationExtension", False)
 
+        current_dir = Path(__file__).resolve().parent
+        cookies_extension_path = current_dir / 'extensions' / 'cookies.crx'
+        options.add_extension(cookies_extension_path.__str__())
         return options
 
     def __init__(self, driver_version: str = None):
