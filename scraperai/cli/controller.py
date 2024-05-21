@@ -309,7 +309,7 @@ class Controller:
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             name = urlparse(self.config.start_url).netloc
             filename = f'{name}_{timestamp}.scraperai.json'
-            with open(DATA_DIR / filename, 'w+') as f:
+            with open(os.path.join(DATA_DIR, filename), 'w+') as f:
                 f.write(self.config.model_dump_json())
         self.scrape()
         self.export_results()
