@@ -75,8 +75,11 @@ print(items)
 That's all! All the data can be found in `items` list. You may further convert it to any desired format.
 
 ## Jupyter notebook
-You can find a more detailed example in this [jupyter notebook](https://github.com/scraperai/scraperai/blob/main/example.ipynb).
+You can find a more detailed example in this [jupyter notebook](https://github.com/scraperai/scraperai/blob/main/examples/ycombinator_full.ipynb).
 In the notebook we present two expirements:
 
 1. [List of YCombinator companies](https://www.ycombinator.com/companies/)
 2. [List of commits in the repository](https://github.com/scraperai/scraperai/commits/main/)
+
+## Other
+Other examples can be found [here](https://github.com/scraperai/scraperai/blob/main/examples/).

@@ -97,7 +97,8 @@ The requests package is also supported, albeit with some limitations.
 
 ## Demo
 ### Jupyter notebook
-We put example of basic scraper usage in the `example.ipynb`. 
+We put examples of basic scraper usage in the `/examples` folder. 
+We recommend to start from [YCombinator example](https://github.com/scraperai/scraperai/blob/main/examples/ycombinator_full.ipynb). 
 In this notebook we present two expirements:
 1. [List of YCombinator companies](https://www.ycombinator.com/companies/)
 2. [List of commits in the repository](https://github.com/scraperai/scraperai/commits/main/)

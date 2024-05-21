@@ -133,7 +133,6 @@ dmypy.json
 .pyre/
 
 *.DS_Store
-*.ipynb
 
 # tests
 debug/

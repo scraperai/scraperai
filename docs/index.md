@@ -48,7 +48,7 @@ scraperai --url https://www.ycombinator.com/companies
 command in your console.
 
 # Demo
-For a more detailed example, refer to this [jupyter notebook](https://github.com/scraperai/scraperai/blob/main/example.ipynb).
+We put some examples of scraper usage [here](https://github.com/scraperai/scraperai/blob/main/examples/).
 
 # Support
 If you have any questions or need help, please open a new issue.
