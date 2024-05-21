@@ -78,6 +78,7 @@ class PaginationDetector(ChatModelAgent):
             values = extract_field_by_xpath(tree, xpath)
             if not isinstance(values, list):
                 return xpath
+            # TODO: Check if element is clickable
             return None
     
     def _find_pagination_classname(self, html_content: str) -> str | None:

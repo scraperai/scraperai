@@ -165,16 +165,20 @@ def get_node_text(node) -> str:
     return text
 
 
-def extract_field_by_xpath(tree, xpath: str) -> Any:
+def extract_field_by_xpath(tree, xpath: str, multiple: bool | None = None) -> Any:
     nodes = tree.xpath(xpath)
     nodes = [get_node_text(node) for node in nodes]
     if len(nodes) == 0:
-        value = None
-    elif len(nodes) == 1:
-        value = nodes[0]
+        return None
+    if multiple is None:
+        if len(nodes) == 1:
+            return nodes[0]
+        else:
+            return nodes
+    elif multiple:
+        return nodes
     else:
-        value = nodes
-    return value
+        return nodes[0]
 
 
 def extract_dynamic_fields_by_xpath(name_xpath: str,

@@ -23,7 +23,8 @@ def extract_static_fields(tree, static_fields: list[StaticField], select_context
     return {
         field.field_name: extract_field_by_xpath(
             tree,
-            xpath=_prepare_xpath(field.field_xpath, select_context_node)
+            xpath=_prepare_xpath(field.field_xpath, select_context_node),
+            multiple=field.multiple
         ) for field in static_fields
     }
 

@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import enum
 from typing import Literal, Optional, Any
+import uuid
+
 from pydantic import BaseModel
 
 
@@ -7,6 +11,9 @@ class StaticField(BaseModel):
     field_name: str
     field_xpath: str
     first_value: Optional[Any] = None
+    multiple: bool = False
+    extract_mode: Literal['text', 'href', 'src'] = 'text'
+    id: uuid.UUID = uuid.uuid4()
 
 
 class DynamicField(BaseModel):
@@ -14,6 +21,7 @@ class DynamicField(BaseModel):
     name_xpath: str
     value_xpath: str
     first_values: Optional[dict[str, str]] = None
+    id: uuid.UUID = uuid.uuid4()
 
 
 class WebpageFields(BaseModel):
@@ -27,7 +35,7 @@ class WebpageFields(BaseModel):
 
 class CatalogItem(BaseModel):
     card_xpath: str
-    url_xpath: str
+    url_xpath: Optional[str]
     html_snippet: str
     urls_on_page: list[str]
 

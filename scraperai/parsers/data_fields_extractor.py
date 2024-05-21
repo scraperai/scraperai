@@ -65,6 +65,7 @@ If nothing found return empty array"""
             for i in range(len(model.fields)):
                 mod_xpath = '.' + model.fields[i].field_xpath.lstrip('.')
                 model.fields[i].first_value = extract_field_by_xpath(tree, mod_xpath)
+                model.fields[i].multiple = isinstance(model.fields[i], list)
             return model.fields
 
         def _validate_response(json_data: dict) -> Optional[str]:
