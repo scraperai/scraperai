@@ -13,7 +13,7 @@ logger = logging.getLogger('scraperai')
 
 
 class JsonOpenAI(BaseJsonLM):
-    latest = 'gpt-4-turbo-2024-04-09'
+    latest = 'gpt-4o'
 
     def __init__(self,
                  openai_api_key: str,
