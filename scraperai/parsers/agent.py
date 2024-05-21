@@ -3,6 +3,7 @@ from typing import Callable, Any, Optional
 
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
+from scraperai.exceptions import NotFoundError
 from scraperai.lm import BaseJsonLM, BaseVision
 
 
@@ -33,7 +34,6 @@ class ChatModelAgent:
                 AIMessage(content=str(response)),
                 HumanMessage(content='Your previous response was wrong because ' + new_error_message)
             ]
-            print(len(new_messages))
             return self.query_with_validation(new_messages, validator, max_retries, current_try + 1)
         else:
-            raise Exception(new_error_message)
+            raise NotFoundError(new_error_message)

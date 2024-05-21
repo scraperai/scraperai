@@ -17,7 +17,7 @@ logger = logging.getLogger('scraperai')
 
 
 class CatalogItemResponseModel(BaseModel):
-    card: Optional[str]
+    card: str
     url: Optional[str]
 
 
@@ -25,32 +25,24 @@ class CatalogItemDetector(ChatModelAgent):
     def __init__(self, model: BaseJsonLM):
         super().__init__(model)
         self.model = model
-        self.max_chunk_size = 16000
+        self.max_chunk_size = 32000
 
     def detect_catalog_item(self, html_content: str, extra_prompt: str = None) -> CatalogItem:
-        compressed_html, subs = minify_html(html_content, good_attrs={'class', 'href'})
+        compressed_html, subs = minify_html(html_content, good_attrs={'class', 'href', 'id'})
         tree = html.fromstring(compressed_html)
 
         system_prompt = """
-You are an HTML parser. You will be given an HTML page with a catalog or table. 
+You are an HTML parser. You will be given an HTML page with a catalog.
+Your primary goal is to find xpath selectors to these elements.
 Catalog elements or table's rows might be articles, projects, goods, companies, repositories and others.
-Your primary goal is to find classname of these elements. T
-his elements could be represented as "a", "li", "div", "article" and other HTML tags.
-Each element must have a name and url.
-Your primary goal is to find xpath selectors to the catalog elements.
+Each element includes name, image, url.
+Your primary goal is to find xpath selectors of the catalog elements.
 It is better to use xpath with classname.
 The output should be a JSON dictionary like this:
 ```
 {
     "card": "xpath to select all catalog cards",
     "url": "xpath to select href urls",
-}
-```
-If you have not found any relevant data return:
-```
-{
-    "card": null,
-    "url": null
 }
 ```"""
         html_part = TokenTextSplitter(chunk_size=self.max_chunk_size).split_text(compressed_html)[0]
@@ -67,32 +59,35 @@ If you have not found any relevant data return:
                 model = CatalogItemResponseModel(**response)
             except ValidationError as exc:
                 return build_validation_error_message(exc)
-            if model.card is None or model.url is None:
-                return None
+            try:
+                tree.xpath(model.card)[0]
+            except Exception as exc:
+                return f'Cannot extract node with xpath="{model.card}"'
+
             # Validate xpath
-            cards_count = len(tree.xpath(model.card))
-            urls_count = len(tree.xpath(model.url))
-            if cards_count != urls_count:
-                return f'Card xpath: "{model.card}" and url xpath: "{model.url}" are bad ' \
-                       f'because the number of elements the select are different: {cards_count} != {urls_count}'
+            if model.url and model.card:
+                cards_count = len(tree.xpath(model.card))
+                urls_count = len(tree.xpath(model.url))
+                if cards_count != urls_count:
+                    return f'Card xpath: "{model.card}" and url xpath: "{model.url}" are bad ' \
+                           f'because the number of elements the select are different: {cards_count} != {urls_count}'
             return None
 
-        data: dict[str, str] = self.query_with_validation(messages, _validate_catalog_item, max_retries=2)
+        data: dict[str, str] = self.query_with_validation(messages, _validate_catalog_item, max_retries=5)
         card_xpath = data['card']
         url_xpath = data['url']
-        if card_xpath is None or url_xpath is None:
-            print(card_xpath, url_xpath)
+        if card_xpath is None:
             raise NotFoundError
 
         html_snippet = etree.tostring(tree.xpath(card_xpath)[0],
                                       pretty_print=True,
-                                      method="html",
+                                      method='html',
                                       encoding='unicode')
         return CatalogItem(
             card_xpath=card_xpath,
             url_xpath=url_xpath,
             html_snippet=html_snippet,
-            urls_on_page=tree.xpath(url_xpath)
+            urls_on_page=tree.xpath(url_xpath) if url_xpath else []
         )
 
     def manually_change_catalog_item(self, html_content: str, card_xpath: str, url_xpath: str):
