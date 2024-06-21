@@ -1,7 +1,7 @@
 import logging
 
-from scraperai.lm.base import BaseVision
-from scraperai.lm.openai import JsonOpenAI, VisionOpenAI
+from scraperai.llm.base import BaseVision
+from scraperai.llm.openai import JsonOpenAI, VisionOpenAI
 from scraperai.parsers import (
     PaginationDetector,
     WebpageVisionClassifier,

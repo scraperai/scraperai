@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from langchain_core.messages import SystemMessage, HumanMessage
 from lxml import html
 
-from scraperai.lm.base import BaseJsonLM
+from scraperai.llm.base import BaseJsonLM
 from scraperai.parsers.agent import ChatModelAgent
 from scraperai.models import Pagination
 from scraperai.utils.html import minify_html, extract_field_by_xpath

@@ -1,7 +1,7 @@
 import unittest
 
 from scraperai.parsers import DataFieldsExtractor
-from scraperai.lm.openai import JsonOpenAI
+from scraperai.llm.openai import JsonOpenAI
 from scraperai.utils import html
 from .settings import OPENAI_API_KEY, DATA_DIR
 

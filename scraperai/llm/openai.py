@@ -7,7 +7,7 @@ from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from scraperai.lm.base import BaseJsonLM, _Dict, _DictOrPydanticClass, BaseVision
+from scraperai.llm.base import BaseJsonLM, _Dict, _DictOrPydanticClass, BaseVision
 
 logger = logging.getLogger('scraperai')
 

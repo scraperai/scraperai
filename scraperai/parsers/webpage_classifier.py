@@ -7,7 +7,7 @@ from scraperai.parsers.agent import ChatModelAgent
 from scraperai.models import WebpageType
 from scraperai.utils.html import minify_html
 from scraperai.utils.image import encode_image_to_b64
-from scraperai.lm.base import BaseVision, BaseJsonLM
+from scraperai.llm.base import BaseVision, BaseJsonLM
 
 
 class WebpageVisionClassifier(ChatModelAgent):
@@ -17,10 +17,9 @@ class WebpageVisionClassifier(ChatModelAgent):
 
     def classify(self, screenshot: str) -> WebpageType:
         system_prompt = f"""
-Your goal is to classify website by screenshot into 4 categories - {WebpageType.values_repr()}.
+Your goal is to classify website by screenshot into 2 categories - "catalog", "detailed_page".
 "catalog" page contains a table or a list of similar elements or cards.
 "detailed_page" contains description of one product.
-In other cases return "other".
 Return only category name in the answer.
 """
         user_prompt = ""

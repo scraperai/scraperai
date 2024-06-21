@@ -3,7 +3,7 @@ import logging
 
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from scraperai.lm.base import BaseJsonLM, BaseVision
+from scraperai.llm.base import BaseJsonLM, BaseVision
 from scraperai.utils.html import split_html, HtmlPart, minify_html, remove_nodes_by_xpath
 from scraperai.utils.image import encode_image_to_b64
 
@@ -146,7 +146,7 @@ Descriptions data:
 
 def test_vision():
     from tests.settings import BASE_DIR, OPENAI_API_KEY
-    from scraperai.lm.openai import VisionOpenAI
+    from scraperai.llm.openai import VisionOpenAI
     descriptor = WebpageVisionDescriptor(VisionOpenAI(OPENAI_API_KEY))
     with open(BASE_DIR / 'tests' / 'data' / 'ozon_detail_page.html', 'r') as f:
         html_content = f.read()
@@ -158,7 +158,7 @@ def test_vision():
 
 def test():
     from tests.settings import BASE_DIR, OPENAI_API_KEY
-    from scraperai.lm.openai import JsonOpenAI
+    from scraperai.llm.openai import JsonOpenAI
     descriptor = WebpagePartsDescriptor(JsonOpenAI(OPENAI_API_KEY, temperature=0))
     with open(BASE_DIR / 'tests' / 'data' / 'ozon_detail_page.html', 'r') as f:
         html_content = f.read()

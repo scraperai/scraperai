@@ -6,7 +6,7 @@ from langchain_text_splitters import TokenTextSplitter
 from lxml import html
 from pydantic import BaseModel, ValidationError
 
-from scraperai.lm.base import BaseJsonLM
+from scraperai.llm.base import BaseJsonLM
 from scraperai.parsers.agent import ChatModelAgent
 from scraperai.models import StaticField, WebpageFields, DynamicField
 from scraperai.parsers.utils import build_validation_error_message

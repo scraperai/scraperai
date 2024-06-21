@@ -4,7 +4,7 @@ from typing import Callable, Any, Optional
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
 from scraperai.exceptions import NotFoundError
-from scraperai.lm import BaseJsonLM, BaseVision
+from scraperai.llm import BaseJsonLM, BaseVision
 
 
 logger = logging.getLogger('scraperai')

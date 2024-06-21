@@ -7,7 +7,7 @@ from lxml import html, etree
 from pydantic import BaseModel, ValidationError
 
 from scraperai.exceptions import NotFoundError
-from scraperai.lm.base import BaseJsonLM
+from scraperai.llm.base import BaseJsonLM
 from scraperai.parsers.agent import ChatModelAgent
 from scraperai.models import CatalogItem
 from scraperai.parsers.utils import build_validation_error_message
