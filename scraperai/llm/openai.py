@@ -7,9 +7,37 @@ from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from scraperai.llm.base import BaseJsonLM, _Dict, _DictOrPydanticClass, BaseVision
+from scraperai.llm.base import BaseJsonLM, _Dict, _DictOrPydanticClass, BaseVision, BasePythonCodeLM
+from scraperai.utils.code import extract_python_code
 
 logger = logging.getLogger('scraperai')
+
+
+class PythonCodeOpenAI(BasePythonCodeLM):
+    latest = 'gpt-4o'
+
+    def __init__(self,
+                 openai_api_key: str,
+                 openai_organization: str = None,
+                 model_name: str = latest,
+                 **kwargs):
+        self.chat = ChatOpenAI(model=model_name,
+                               openai_api_key=openai_api_key,
+                               openai_organization=openai_organization,
+                               max_retries=3,
+                               **kwargs)
+        self._total_cost = 0
+
+    @property
+    def total_cost(self) -> float:
+        return self._total_cost
+
+    def invoke(self, messages: list[BaseMessage]) -> str:
+        with get_openai_callback() as cb:
+            text = self.chat.invoke(messages).content
+            self._total_cost += cb.total_cost
+            logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost}")
+        return extract_python_code(text)
 
 
 class JsonOpenAI(BaseJsonLM):

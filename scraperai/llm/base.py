@@ -9,6 +9,12 @@ _Dict = Dict[str, Any]
 _DictOrPydanticClass = Union[_Dict, Type[_BM]]
 
 
+class BasePythonCodeLM(ABC):
+    @abstractmethod
+    def invoke(self, messages: list[BaseMessage]) -> str:
+        ...
+
+
 class BaseJsonLM(ABC):
     @abstractmethod
     def invoke(self, messages: list[BaseMessage]) -> _Dict:

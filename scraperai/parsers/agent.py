@@ -5,13 +5,13 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
 from scraperai.exceptions import NotFoundError
 from scraperai.llm import BaseJsonLM, BaseVision
-
+from scraperai.llm.base import BasePythonCodeLM
 
 logger = logging.getLogger('scraperai')
 
 
 class ChatModelAgent:
-    def __init__(self, model: BaseJsonLM | BaseVision):
+    def __init__(self, model: BaseJsonLM | BaseVision | BasePythonCodeLM):
         self.model = model
 
     def query_with_validation(self,
