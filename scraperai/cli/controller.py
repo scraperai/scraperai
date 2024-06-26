@@ -12,7 +12,7 @@ from scraperai.cli.model import ScreenStatus
 from scraperai.cli.utils import convert_ranges_to_indices, delete_fields_by_range, delete_field_by_name, DATA_DIR
 from scraperai.cli.view import View
 from scraperai.exceptions import NotFoundError
-from scraperai.models import CatalogItem, WebpageFields, ScraperConfig, WebpageType
+from scraperai.models import CatalogItem, WebpageFields, ScraperConfig, WebpageType, Pagination
 from scraperai import ParserAI
 from scraperai.crawlers import SeleniumCrawler
 from scraperai.scraper import Scraper
@@ -28,7 +28,7 @@ class Controller:
         self.config = ScraperConfig(
             start_url=start_url,
             page_type=None,
-            pagination=None,
+            pagination=Pagination(type='none'),
             catalog_item=None,
             open_nested_pages=False,
             fields=WebpageFields(static_fields=[], dynamic_fields=[]),
@@ -89,8 +89,17 @@ class Controller:
         self.view.show_pagination_screen(status=ScreenStatus.loading)
         self.crawler.get(self.start_url)
         pagination = self.parser.detect_pagination(page_source=self.crawler.page_source)
-        self.view.show_pagination_screen(status=ScreenStatus.show, pagination=pagination)
-        pagination = self.view.show_pagination_screen(status=ScreenStatus.edit, pagination=pagination)
+        while True:
+            self.view.show_pagination_screen(status=ScreenStatus.show, pagination=pagination)
+            form = self.view.show_pagination_screen(status=ScreenStatus.edit, pagination=pagination)
+            if form is None:
+                break
+            urls = form.urls
+            if form.user_prompt:
+                urls = self.parser.generate_pagination_urls(form.user_prompt)
+            pagination.type = form.type
+            pagination.xpath = form.xpath
+            pagination.urls = urls
         self.config.pagination = pagination
 
     def detect_catalog_item(self, extra_prompt: str = None, catalog_item: CatalogItem = None):
@@ -134,14 +143,11 @@ class Controller:
         if not isinstance(self.crawler, SeleniumCrawler):
             return
 
-        colors = ['#539878', '#5499D1', '#549B9A', '#5982A3', '#5A5499', '#68D5A2', '#75DDDC', '#8981D7', '#98D1FF',
-                  '#98FFCF', '#9D5A5A', '#A05789', '#AAFFFE', '#C6C1FF', '#CD7CB3', '#D17A79', '#FAB4E4', '#FFB1B0']
         for index, field in enumerate(fields.static_fields):
-            self.crawler.highlight_by_xpath(field.field_xpath, colors[index % len(colors)], border=4)
+            self.crawler.highlight_by_xpath(field.field_xpath, field.color, border=4)
         for index, field in enumerate(fields.dynamic_fields):
-            color = colors[index % len(colors)]
-            self.crawler.highlight_by_xpath(field.value_xpath, color, border=3)
-            self.crawler.highlight_by_xpath(field.name_xpath, color, border=3)
+            self.crawler.highlight_by_xpath(field.value_xpath, field.color, border=3)
+            self.crawler.highlight_by_xpath(field.name_xpath, field.color, border=3)
 
     def detect_fields(self, *, nested_page_url: str = None, html_snippet: str = None):
         self.view.show_fields_screen(status=ScreenStatus.loading)
@@ -197,8 +203,12 @@ class Controller:
             self.quit('Unsupported page type. Aborting...')
             return
         elif self.config.page_type == WebpageType.DETAILS:
+            if self.config.pagination.type == 'urls':
+                urls = set(self.config.pagination.urls)
+            else:
+                urls = {self.config.start_url}
             rows = []
-            for row in scraper.scrape_nested_items([self.start_url]):
+            for row in scraper.scrape_nested_items(urls):
                 rows.append(row)
         else:
             if self.config.open_nested_pages:

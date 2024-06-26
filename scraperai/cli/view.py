@@ -1,9 +1,10 @@
+import os.path
 from typing import Literal
 
 import click
 import pandas as pd
 
-from scraperai.cli.model import ScreenStatus, CardEditFormModel, FieldsEditFormModel
+from scraperai.cli.model import ScreenStatus, CardEditFormModel, FieldsEditFormModel, PaginationFormModel
 from scraperai.models import CatalogItem, WebpageFields, WebpageType, Pagination, ScraperConfig
 
 
@@ -47,30 +48,30 @@ class View:
 
     def show_pagination_screen(self,
                                status: ScreenStatus,
-                               pagination: Pagination = None) -> Pagination | None:
+                               pagination: Pagination = None) -> PaginationFormModel | None:
         if status == ScreenStatus.loading:
             click.echo(f'Detecting pagination...')
         elif status == ScreenStatus.show:
             click.echo(f'Detected pagination: {pagination}')
         elif status == ScreenStatus.edit:
             if click.confirm('Do you want to change pagination?', default=False):
-                types = ['xpath', 'scroll', 'url_param']
+                types = ['xpath', 'scroll', 'urls', 'none']
                 new_type = click.prompt(
                     f'Enter pagination type',
                     type=click.Choice(types, case_sensitive=False)
                 )
-                new_xpath = None
-                new_url_param = None
+                response = PaginationFormModel(type=new_type)
                 if new_type == 'xpath':
-                    new_xpath = click.prompt(f'Enter next-page button xpath')
-                elif new_type == 'url_param':
-                    new_url_param = click.prompt(f'Enter page url param name')
-                pagination = Pagination(
-                    type=new_type,
-                    xpath=new_xpath,
-                    url_param=new_url_param
-                )
-        return pagination
+                    response.xpath = click.prompt(f'Enter next-page button xpath')
+                elif new_type == 'urls':
+                    urls_input = click.prompt(f'Enter path to a file with urls or describe a rule how to generate urls')
+                    if os.path.isfile(urls_input):
+                        with open(urls_input, 'r') as f:
+                            response.urls = f.read().split()
+                    else:
+                        response.user_prompt = urls_input
+                return response
+        return None
 
     def show_card_screen(self, status: ScreenStatus, catalog_item: CatalogItem = None) -> CardEditFormModel | None:
         if status == ScreenStatus.loading:

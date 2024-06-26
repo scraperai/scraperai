@@ -4,14 +4,11 @@ import time
 import selenium
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver as BaseSeleniumWebDriver
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 from scraperai.crawlers.base import BaseCrawler
 from scraperai.crawlers.webdriver import utils
 from scraperai.crawlers.webdriver.local import DefaultChromeWebdriver
 from scraperai.models import Pagination
-from scraperai.utils.urls import add_or_replace_url_param, get_url_query_param_value
 
 logger = logging.getLogger('scraperai')
 
@@ -24,6 +21,7 @@ class SeleniumCrawler(BaseCrawler):
         else:
             self.driver = driver
         self.__last_height = None
+        self.__pagination_url_index = 0
 
     def get(self, url: str):
         if self.driver.current_url == url:
@@ -50,28 +48,16 @@ class SeleniumCrawler(BaseCrawler):
     def highlight_by_xpath(self, xpath: str, color: str, border: int):
         utils.highlight_by_xpath(self.driver, xpath, color, border)
 
-    def _scroll(self, times: int = 10, delay: float = 0.4):
-        for _ in range(times):
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(delay)
+    def back(self):
+        self.driver.back()
 
-    def scroll_to_bottom(self) -> bool:
-        """Scrolls the webpage to the bottom using Selenium"""
-        curr_height = self.driver.execute_script("return document.body.scrollHeight")
-        self._scroll()
-        if self.__last_height == curr_height:
-            time.sleep(5)
-            self._scroll()
-        time.sleep(2)
-        if self.__last_height == curr_height:
-            self.__last_height = None
-            return False
-        else:
-            self.__last_height = self.driver.execute_script("return document.body.scrollHeight")
-            return True
+    def _scroll(self) -> bool:
+        prev_y = self.driver.execute_script('return window.pageYOffset;')
+        self.driver.execute_script("window.scrollBy(0, 500);")
+        curr_y = self.driver.execute_script('return window.pageYOffset;')
+        return prev_y != curr_y
 
     def switch_page(self, pagination: Pagination) -> bool:
-        # TODO: Need a way to understand when to stop changing pages
         if pagination.type == 'xpath':
             try:
                 self.click(pagination.xpath)
@@ -83,17 +69,13 @@ class SeleniumCrawler(BaseCrawler):
             except Exception as e:
                 logger.exception(e)
                 return False
-        elif pagination.type == 'url_param':
-            params = get_url_query_param_value(self.driver.current_url, pagination.url_param)
-            if params is None:
-                new_page = pagination.url_param_first_value
-            else:
-                new_page = int(params[0]) + 1
-            new_url = add_or_replace_url_param(self.driver.current_url, pagination.url_param, new_page)
-            self.get(new_url)
-            # TODO: How to stop pagination?
+        elif pagination.type == 'urls':
+            if self.__pagination_url_index >= len(pagination.urls):
+                return False
+            self.get(pagination.urls[self.__pagination_url_index])
+            self.__pagination_url_index += 1
             return True
         elif pagination.type == 'scroll':
-            return self.scroll_to_bottom()
+            return self._scroll()
         else:
-            raise TypeError
+            return False

@@ -67,7 +67,7 @@ This feature is applicable for catalog-type web pages, supporting:
 
 - `xpath`: Xpath of pagination buttons like "Next page", "More", etc.
 - `scroll`: Infinite scrolling.
-- `url_param`: URL parameter-based pagination (e.g., `website.com/?page=1`).
+- `urls`: a list of URLs.
 
 #### Catalog Item Detector
 This feature is specifically designed for catalog-type web pages. It identifies repeating elements that typically 

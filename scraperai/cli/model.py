@@ -22,3 +22,10 @@ class ScreenStatus(enum.Enum):
     loading = 'loading'
     show = 'show'
     edit = 'edit'
+
+
+class PaginationFormModel(BaseModel):
+    type: Literal['xpath', 'scroll', 'urls', 'none']
+    xpath: Optional[str] = None
+    urls: Optional[list[str]] = None
+    user_prompt: Optional[str] = None

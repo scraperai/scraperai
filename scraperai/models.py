@@ -4,6 +4,7 @@ import enum
 from typing import Literal, Optional, Any
 import uuid
 
+import pydantic
 from pydantic import BaseModel
 
 
@@ -14,6 +15,7 @@ class StaticField(BaseModel):
     multiple: bool = False
     extract_mode: Literal['text', 'href', 'src'] = 'text'
     id: uuid.UUID = uuid.uuid4()
+    color: Optional[str] = None
 
 
 class DynamicField(BaseModel):
@@ -22,6 +24,7 @@ class DynamicField(BaseModel):
     value_xpath: str
     first_values: Optional[dict[str, str]] = None
     id: uuid.UUID = uuid.uuid4()
+    color: Optional[str] = None
 
 
 class WebpageFields(BaseModel):
@@ -36,32 +39,25 @@ class WebpageFields(BaseModel):
 class CatalogItem(BaseModel):
     card_xpath: str
     url_xpath: Optional[str]
-    html_snippet: str
+    html_snippet: str = pydantic.Field(..., repr=False)
     urls_on_page: list[str]
-
-    def __repr__(self):
-        urls_to_print = self.urls_on_page[0:3]
-        if len(self.urls_on_page) > 3:
-            urls_to_print.append(f'...')
-        return f"""<card_xpath={self.card_xpath}
- url_xpath={self.url_xpath}
- urls_on_page={self.urls_on_page}
->"""
 
 
 class Pagination(BaseModel):
-    type: Literal['xpath', 'scroll', 'url_param']
+    type: Literal['xpath', 'scroll', 'urls', 'none']
     xpath: Optional[str] = None
-    url_param: Optional[str] = None
-    url_param_first_value: int = 1
+    urls: list[str] = pydantic.Field([], repr=False)
 
     def __str__(self):
-        if self.type == 'scroll':
-            return f'Pagination using infinite scroll'
-        elif self.type == 'xpath':
-            return f'Pagination using button with xpath: {self.xpath}'
-        else:
-            return f'Pagination using url parameter "{self.url_param}"'
+        match self.type:
+            case 'scroll':
+                return f'Pagination using infinite scroll'
+            case 'xpath':
+                return f'Pagination using button with xpath: {self.xpath}'
+            case 'urls':
+                return f'Pagination with list of urls (total of {len(self.urls)})'
+            case _:
+                return 'No pagination'
 
 
 class WebpageType(str, enum.Enum):
@@ -78,7 +74,7 @@ class WebpageType(str, enum.Enum):
 class ScraperConfig(BaseModel):
     start_url: str
     page_type: Optional[WebpageType]
-    pagination: Optional[Pagination]
+    pagination: Pagination
     catalog_item: Optional[CatalogItem]
     open_nested_pages: bool
     fields: WebpageFields

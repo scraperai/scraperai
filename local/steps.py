@@ -29,7 +29,7 @@ class LocalScraperAI:
         self.config = ScraperConfig(
             start_url=url,
             page_type=None,
-            pagination=None,
+            pagination=Pagination(type='none'),
             catalog_item=None,
             open_nested_pages=False,
             fields=WebpageFields(static_fields=[], dynamic_fields=[]),
@@ -89,7 +89,6 @@ class LocalScraperAI:
             self.config.catalog_item = catalog_item
             self.highlight_catalog_items()
         except Exception as e:
-            return e
             self.config.page_type = WebpageType.DETAILS
 
     def extract_fields_not_nested(self):
@@ -171,14 +170,11 @@ class LocalScraperAI:
     def highlight_fields(self):
         crawler = self.crawler
         fields = self.config.fields
-        colors = ['#539878', '#5499D1', '#549B9A', '#5982A3', '#5A5499', '#68D5A2', '#75DDDC', '#8981D7', '#98D1FF',
-                  '#98FFCF', '#9D5A5A', '#A05789', '#AAFFFE', '#C6C1FF', '#CD7CB3', '#D17A79', '#FAB4E4', '#FFB1B0']
         for index, field in enumerate(fields.static_fields):
-            crawler.highlight_by_xpath(field.field_xpath, colors[index % len(colors)], border=4)
+            crawler.highlight_by_xpath(field.field_xpath, field.color, border=4)
         for index, field in enumerate(fields.dynamic_fields):
-            color = colors[index % len(colors)]
-            crawler.highlight_by_xpath(field.value_xpath, color, border=3)
-            crawler.highlight_by_xpath(field.name_xpath, color, border=3)
+            crawler.highlight_by_xpath(field.value_xpath, field.color, border=3)
+            crawler.highlight_by_xpath(field.name_xpath, field.color, border=3)
 
     def highlight_catalog_items(self):
         catalog_item = self.config.catalog_item

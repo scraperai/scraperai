@@ -1,7 +1,7 @@
 import logging
 
-from scraperai.llm.base import BaseVision
-from scraperai.llm.openai import JsonOpenAI, VisionOpenAI
+from scraperai.llm.base import BaseVision, BasePythonCodeLM
+from scraperai.llm.openai import JsonOpenAI, VisionOpenAI, PythonCodeOpenAI
 from scraperai.parsers import (
     PaginationDetector,
     WebpageVisionClassifier,
@@ -12,6 +12,7 @@ from scraperai.parsers import (
     DataFieldsExtractor
 )
 from scraperai.models import WebpageFields, CatalogItem, Pagination, WebpageType
+from scraperai.utils.constants import COLORS
 from scraperai.utils.urls import fix_relative_url
 from scraperai.utils.image import compress_b64_image
 
@@ -22,6 +23,7 @@ class ParserAI:
     def __init__(self,
                  json_lm_model: JsonOpenAI = None,
                  vision_model: BaseVision = None,
+                 code_model: BasePythonCodeLM = None,
                  openai_api_key: str = None,
                  openai_organization: str = None):
 
@@ -34,6 +36,11 @@ class ParserAI:
             self.vision_model = VisionOpenAI(openai_api_key, openai_organization, temperature=0)
         else:
             self.vision_model = vision_model
+
+        if code_model is None:
+            self.code_model = PythonCodeOpenAI(openai_api_key, openai_organization)
+        else:
+            self.code_model = code_model
 
     @property
     def total_cost(self) -> float:
@@ -58,7 +65,7 @@ class ParserAI:
         try:
             return detector.find_pagination(page_source)
         except:
-            return Pagination(type='scroll')
+            return Pagination(type='none')
 
     def detect_catalog_item(self, page_source: str, website_url: str, extra_prompt: str = None) -> CatalogItem | None:
         detector = CatalogItemDetector(model=self.json_lm_model)
@@ -72,13 +79,25 @@ class ParserAI:
         item.urls_on_page = [fix_relative_url(website_url, u) for u in item.urls_on_page]
         return item
 
+    def set_fields_colors(self, fields: WebpageFields) -> WebpageFields:
+        index_color = 0
+        for i in range(len(fields.static_fields)):
+            fields.static_fields[i].color = COLORS[index_color % len(COLORS)]
+            index_color += 1
+        for i in range(len(fields.dynamic_fields)):
+            fields.dynamic_fields[i].color = COLORS[index_color % len(COLORS)]
+            index_color += 1
+        return fields
+
     def extract_fields(self, html_snippet: str) -> WebpageFields:
-        return DataFieldsExtractor(model=self.json_lm_model).extract_fields(html_snippet)
+        fields = DataFieldsExtractor(model=self.json_lm_model).extract_fields(html_snippet)
+        return self.set_fields_colors(fields)
 
     def find_fields(self, html_snippet: str, user_description: str) -> WebpageFields:
         context = f"IMPORTANT! Search for fields that are described in " \
                   f"the following very important instructions: {user_description}"
-        return DataFieldsExtractor(model=self.json_lm_model).find_fields(html_snippet, context)
+        fields = DataFieldsExtractor(model=self.json_lm_model).find_fields(html_snippet, context)
+        return self.set_fields_colors(fields)
 
     def summarize_details_page_as_valid_html(self, page_source: str, screenshot: str | None = None) -> str:
         if screenshot is not None:

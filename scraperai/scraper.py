@@ -18,7 +18,11 @@ class Scraper:
 
     def scrape(self) -> Generator[dict, None, None]:
         if self.config.page_type == WebpageType.DETAILS:
-            for row in self.scrape_nested_items([self.config.start_url]):
+            if self.config.pagination.type == 'urls':
+                urls = self.config.pagination.urls
+            else:
+                urls = [self.config.start_url]
+            for row in self.scrape_nested_items(urls):
                 yield row
         elif self.config.page_type == WebpageType.CATALOG:
             if self.config.open_nested_pages:
