@@ -1,5 +1,6 @@
 import unittest
-from scraperai.parsers import WebpageType, WebpageVisionClassifier
+from scraperai.parsers import WebpageVisionClassifier
+from scraperai.models import WebpageType
 from scraperai.crawlers import SeleniumCrawler
 from scraperai.utils.image import compress_b64_image
 from scraperai.llm.openai import VisionOpenAI

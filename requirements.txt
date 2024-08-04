@@ -1,11 +1,12 @@
 # ML
 packaging==23.2
-langchain==0.1.16
-langchain_community
-langchain_openai
-langchain_text_splitters
-openai
-tiktoken
+langchain==0.2.12
+langchain-core==0.2.28
+langchain_community==0.2.11
+langchain_openai==0.1.20
+langchain_text_splitters==0.2.2
+openai==1.37.1
+tiktoken==0.7.0
 
 # Parsing
 htmlmin

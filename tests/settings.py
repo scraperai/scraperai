@@ -21,8 +21,8 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 SELENOID_URL = os.getenv('SELENOID_URL')
 
 selenoid_capabilities = {
-    "browserName": "firefox",
-    "browserVersion": "115.0",
+    "browserName": "chrome",
+    "browserVersion": "latest",
     "selenoid:options": {
         "name": "scraperai",
         "enableVideo": False,
