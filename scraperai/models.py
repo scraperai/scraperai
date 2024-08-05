@@ -5,7 +5,7 @@ from typing import Literal, Optional, Any
 import uuid
 
 import pydantic
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class StaticField(BaseModel):
@@ -14,7 +14,7 @@ class StaticField(BaseModel):
     first_value: Optional[Any] = None
     multiple: bool = False
     extract_mode: Literal['text', 'href', 'src'] = 'text'
-    id: uuid.UUID = uuid.uuid4()
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
     color: Optional[str] = None
 
 
@@ -23,7 +23,7 @@ class DynamicField(BaseModel):
     name_xpath: str
     value_xpath: str
     first_values: Optional[dict[str, str]] = None
-    id: uuid.UUID = uuid.uuid4()
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
     color: Optional[str] = None
 
 
