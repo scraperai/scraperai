@@ -14,7 +14,7 @@ requests
 beautifulsoup4
 lxml>=5.0.0
 selenium==4.9.1
-webdriver-manager
+webdriver-manager==4.0.2
 
 # Data
 numpy==1.26.4

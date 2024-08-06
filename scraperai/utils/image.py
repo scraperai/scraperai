@@ -34,7 +34,7 @@ def compress_b64_image(b64_image: str, aspect_ratio: float = None, max_dimension
             new_size = (int(image.width * max_dimension / image.height), max_dimension)
     else:
         raise TypeError('Either aspect_ratio or max_dimension should be specified')
-
+    print(new_size)
     resized_image = image.resize(new_size, Image.LANCZOS)
     # file_path = 'image2.png'
     # resized_image.save(file_path)

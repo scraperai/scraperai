@@ -40,7 +40,9 @@ Return only category name in the answer.
                     {"type": "text", "text": user_prompt},
                     {
                         "type": "image_url",
-                        "image_url": encode_image_to_b64(screenshot)
+                        "image_url": {
+                            "url": encode_image_to_b64(screenshot)
+                        }
                     },
                 ]
             )

@@ -2,12 +2,12 @@ import json
 import logging
 from typing import Optional
 
+from langchain_community.callbacks import get_openai_callback
 from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
 from scraperai.llm.base import BaseJsonLM, _Dict, _DictOrPydanticClass, BaseVision, BasePythonCodeLM
-from scraperai.llm.cost_callback import get_cost_tracker_callback
 from scraperai.utils.code import extract_python_code
 
 logger = logging.getLogger('scraperai')
@@ -33,7 +33,7 @@ class PythonCodeOpenAI(BasePythonCodeLM):
         return self._total_cost
 
     def invoke(self, messages: list[BaseMessage]) -> str:
-        with get_cost_tracker_callback() as cb:
+        with get_openai_callback() as cb:
             text = self.chat.invoke(messages).content
             self._total_cost += cb.total_cost
             logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost}")
@@ -66,7 +66,7 @@ class JsonOpenAI(BaseJsonLM):
         return self._total_cost
 
     def invoke(self, messages: list[BaseMessage]) -> _Dict:
-        with get_cost_tracker_callback() as cb:
+        with get_openai_callback() as cb:
             if self.model_with_structure:
                 response = self.model_with_structure.invoke(messages)
             else:
@@ -82,7 +82,7 @@ class JsonOpenAI(BaseJsonLM):
 
 
 class VisionOpenAI(BaseVision):
-    latest = 'gpt-4-vision-preview'
+    latest = 'gpt-4o'
 
     def __init__(self,
                  openai_api_key: str,
@@ -100,8 +100,8 @@ class VisionOpenAI(BaseVision):
         return self._total_cost
 
     def invoke(self, messages: list[BaseMessage]) -> str:
-        with get_cost_tracker_callback() as cb:
-            response = self.chat.invoke(messages).content
+        with get_openai_callback() as cb:
+            response = self.chat.invoke(messages)
             self._total_cost += cb.total_cost
             logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.3f}")
-        return response
+        return response.content

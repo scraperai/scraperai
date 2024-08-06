@@ -22,7 +22,7 @@ SELENOID_URL = os.getenv('SELENOID_URL')
 
 selenoid_capabilities = {
     "browserName": "chrome",
-    "browserVersion": "latest",
+    "browserVersion": "123.0",
     "selenoid:options": {
         "name": "scraperai",
         "enableVideo": False,
