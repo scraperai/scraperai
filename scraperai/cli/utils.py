@@ -64,5 +64,5 @@ def delete_fields_by_range(fields: WebpageFields, range_to_delete: set[int]) -> 
 
 
 def validate_url(url: str) -> bool:
-    pattern = re.compile(r'^https?://(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:/.*)?$')
+    pattern = re.compile(r'^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$')
     return bool(pattern.match(url))
