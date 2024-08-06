@@ -78,5 +78,6 @@ class ScraperConfig(BaseModel):
     catalog_item: Optional[CatalogItem]
     open_nested_pages: bool
     fields: WebpageFields
-    max_pages: int
-    max_rows: int
+    limit_type: Literal['rows', 'pages', 'none'] = 'none'
+    max_rows: Optional[int] = None
+    max_pages: Optional[int] = None

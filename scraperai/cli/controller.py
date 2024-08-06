@@ -308,7 +308,8 @@ class Controller:
 
         # Step 8: Ask for limits
         if self.config.page_type == WebpageType.CATALOG:
-            max_pages, max_rows = self.view.show_limits_screen()
+            limit_type, max_pages, max_rows = self.view.show_limits_screen()
+            self.config.limit_type = limit_type
             self.config.max_rows = max_rows
             self.config.max_pages = max_pages
 

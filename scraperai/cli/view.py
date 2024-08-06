@@ -153,10 +153,19 @@ class View:
                     model.field_to_delete = click.prompt('Enter field name, index or range (e.g. 1-3,5,6)')
             return model
 
-    def show_limits_screen(self) -> tuple[int, int]:
-        max_pages = click.prompt('Enter catalog pages limit', type=int, default=3)
-        max_rows = click.prompt('Enter rows limit', type=int, default=50)
-        return max_pages, max_rows
+    def show_limits_screen(self) -> tuple[str, int, int]:
+        limit_type = click.prompt(
+            'Enter limit type',
+            type=click.Choice(['none', 'rows', 'pages'], case_sensitive=True),
+            default='rows'
+        )
+        max_rows, max_pages = None, None
+        if limit_type == 'rows':
+            max_rows = click.prompt('Enter rows limit', type=int, default=50)
+        elif limit_type == 'pages':
+            max_pages = click.prompt('Enter catalog pages limit', type=int, default=3)
+
+        return limit_type, max_pages, max_rows
 
     def show_config_screen(self, config: ScraperConfig,
                            total_cost: float = None,

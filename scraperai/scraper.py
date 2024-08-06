@@ -59,23 +59,33 @@ class Scraper:
                 break
 
             page_number += 1
-            if page_number >= self.config.max_pages or total_count >= self.config.max_rows:
-                break
+            if self.config.limit_type == 'pages':
+                if page_number >= self.config.max_pages:
+                    break
+            elif self.config.limit_type == 'rows':
+                if total_count >= self.config.max_rows:
+                    break
 
     def scrape_nested_items_urls(self) -> Generator[str, None, None]:
         page_number = 0
         self.crawler.get(self.config.start_url)
+        total_count = 0
         while True:
             tree = html.fromstring(self.crawler.page_source)
             for url in tree.xpath(self.config.catalog_item.url_xpath):
+                total_count += 1
                 yield fix_relative_url(self.config.start_url, url)
 
             success = self.crawler.switch_page(self.config.pagination)
             if not success:
                 break
             page_number += 1
-            if page_number >= self.config.max_pages:
-                break
+            if self.config.limit_type == 'pages':
+                if page_number >= self.config.max_pages:
+                    break
+            elif self.config.limit_type == 'rows':
+                if total_count >= self.config.max_rows:
+                    break
 
     def scrape_nested_items(self, urls: Iterable[str]) -> Generator[dict, None, None]:
         for index, url in enumerate(urls):
