@@ -30,7 +30,9 @@ It might be a page of the product, service, project or something else.
                     },
                     {
                         "type": "image_url",
-                        "image_url": encode_image_to_b64(screenshot)
+                        "image_url": {
+                            "url": encode_image_to_b64(screenshot)
+                        }
                     },
                 ]
             )
