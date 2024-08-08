@@ -148,7 +148,8 @@ def remove_nodes_by_xpath(html_content: str, xpaths: list[str]) -> str:
     parents_children = []
     for xpath in xpaths:
         for node in tree.xpath(xpath):
-            parents_children.append((node.getparent(), node))
+            if node and node.getparent():
+                parents_children.append((node.getparent(), node))
     for parent, child in parents_children:
         parent.remove(child)
     # Return the modified HTML as a string
