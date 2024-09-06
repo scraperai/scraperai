@@ -41,7 +41,7 @@ class PythonCodeOpenAI(BasePythonCodeLM):
 
 
 class JsonOpenAI(BaseJsonLM):
-    latest = 'gpt-4o'
+    latest = 'gpt-4o-mini'
 
     def __init__(self,
                  openai_api_key: str,
@@ -73,7 +73,7 @@ class JsonOpenAI(BaseJsonLM):
                 text = self.chat.invoke(messages).content
                 response = json.loads(text)
             self._total_cost += cb.total_cost
-            logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.3f}")
+            logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.5f}")
 
         if isinstance(response, BaseModel):
             return response.model_dump()
@@ -82,7 +82,7 @@ class JsonOpenAI(BaseJsonLM):
 
 
 class VisionOpenAI(BaseVision):
-    latest = 'gpt-4o'
+    latest = 'gpt-4o-mini'
 
     def __init__(self,
                  openai_api_key: str,
@@ -103,5 +103,5 @@ class VisionOpenAI(BaseVision):
         with get_openai_callback() as cb:
             response = self.chat.invoke(messages)
             self._total_cost += cb.total_cost
-            logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.3f}")
+            logger.info(f"Total Tokens: {cb.total_tokens}, Total Cost (USD): ${cb.total_cost:.5f}")
         return response.content
