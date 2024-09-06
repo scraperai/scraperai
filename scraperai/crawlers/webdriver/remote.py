@@ -63,9 +63,15 @@ class RemoteWebdriver(webdriver.Remote, BaseWebdriver):
     def from_session_id(url: str, capabilities: dict[str, tp.Any], session_id: str) -> RemoteWebdriver:
         driver = RemoteWebdriver(url, capabilities)
         driver_copy = copy.copy(driver)
-        driver.quit()
         driver_copy.session_id = session_id
-        return driver_copy
+        # Check if the session is valid
+        try:
+            _ = driver_copy.title
+        except Exception:
+            return driver
+        else:
+            driver.quit()
+            return driver_copy
 
     def get_session_id(self) -> str:
         return self.session_id
