@@ -1,1 +1,2 @@
 include scraperai/crawlers/webdriver/useragents.txt
+include scraperai/crawlers/webdriver/extensions/cookies.crx
