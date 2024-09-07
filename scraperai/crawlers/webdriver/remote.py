@@ -4,6 +4,7 @@ import copy
 import typing as tp
 
 import json
+from pathlib import Path
 from urllib.parse import urlparse
 
 from selenium import webdriver
@@ -39,6 +40,11 @@ def _make_chrome_options() -> ChromeOptions:
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     # Turn-off userAutomationExtension
     options.add_experimental_option("useAutomationExtension", False)
+
+    # Add accept-cookie extension
+    current_dir = Path(__file__).resolve().parent
+    cookies_extension_path = current_dir / 'extensions' / 'cookies.crx'
+    options.add_extension(cookies_extension_path.__str__())
 
     return options
 

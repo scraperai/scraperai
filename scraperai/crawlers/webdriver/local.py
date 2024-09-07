@@ -31,6 +31,7 @@ class DefaultChromeWebdriver(webdriver.Chrome, BaseWebdriver):
         # Turn-off userAutomationExtension
         options.add_experimental_option("useAutomationExtension", False)
 
+        # Add accept-cookie extension
         current_dir = Path(__file__).resolve().parent
         cookies_extension_path = current_dir / 'extensions' / 'cookies.crx'
         options.add_extension(cookies_extension_path.__str__())
