@@ -6,9 +6,9 @@ import random
 from IPython.display import clear_output
 
 expressions = {
-    'normal': ' /\_/\  \n( o.o ) \n > ^ <\n{message}',  # Eyes open
-    'blinking': ' /\_/\  \n( -.- ) \n > ^ <\n{message}',  # Blinking
-    'happy': ' /\_/\  \n( ^.^ ) \n > ^ <\n{message}'  # Happy
+    'normal': ' /\\_/\\  \n( o.o ) \n > ^ <\n{message}',  # Eyes open
+    'blinking': ' /\\_/\\  \n( -.- ) \n > ^ <\n{message}',  # Blinking
+    'happy': ' /\\_/\\  \n( ^.^ ) \n > ^ <\n{message}'  # Happy
 }
 
 
