@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Iakov Kaiumov" /><link rel="canonical" href="https://docs.scraper-ai.com/getting-started/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Getting Started - ScraperAI</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Getting Started";
+        var mkdocs_page_input_path = "getting-started.md";
+        var mkdocs_page_url = "/getting-started/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> ScraperAI
+        </a>
+        <div class="version">
+          0.0.2
+        </div><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Introduction</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Getting Started</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#key-components">Key components</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#web-crawler">Web Crawler</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#llms">LLMs</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#html-minifier">HTML minifier</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#page-type-detector">Page Type Detector</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pagination-detector">Pagination Detector</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#catalog-item-detector">Catalog Item Detector</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fields-extractor">Fields Extractor</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Main Components</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../llms/">LLMs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../crawlers/">Crawler</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../parser/">ParserAI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../scraper/">Scraper</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">CLI</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli/">CLI Application</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">ScraperAI</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/scraperai/scraperai/blob/main/docs/getting-started.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="getting-started">Getting Started</h1>
+<h2 id="usage">Usage</h2>
+<h3 id="installation">Installation</h3>
+<p>Install ScraperAI easily using pip or from the source.</p>
+<p>With pip:</p>
+<pre><code class="language-console">pip install scraperai
+</code></pre>
+<p>From source: </p>
+<pre><code class="language-console">git clone https://github.com/scraperai/scraperai.git
+pip install ./scraperai
+</code></pre>
+<h2 id="key-components">Key components</h2>
+<h3 id="web-crawler">Web Crawler</h3>
+<p>Our WebCrawler is engineered to:</p>
+<ul>
+<li>Access web pages.</li>
+<li>Simulate human actions (clicking, scrolling).</li>
+<li>Capture screenshots of web pages.</li>
+</ul>
+<p>Selenium webdriver is the default tool due to its convenience and ease of use, incorporating techniques to avoid most website blocks. 
+Users can implement their versions using other tools like PlayWright. 
+The requests package is also supported, albeit with some limitations.</p>
+<h3 id="llms">LLMs</h3>
+<p>ScraperAI heavily relies on Large Language Models (LLMs) to analyze webpage content and extract relevant information.
+By default, ScraperAI utilizes the latest OpenAI's ChatGPT model.</p>
+<h3 id="html-minifier">HTML minifier</h3>
+<p>HTML contents of the webpages are often very large comparing to the input vectors of the Large Language Models. 
+Fortunately, HTML usually contains a lot of non-relevant information when dealing with scraping.
+This information includes: JS code, styling, meta information, etc.</p>
+<p>Therefore, ScraperAI introduces HTML minification tool that allows to decrease the input vector size and leave only relevant information.
+Usually this tool allows to decrease HTML size by 10-20 times.</p>
+<h3 id="page-type-detector">Page Type Detector</h3>
+<p>Web pages are categorized into four types:</p>
+<ul>
+<li><strong>Catalog</strong>: Pages with similar repeating elements, such as product lists, articles, companies or table rows.</li>
+<li><strong>Details</strong>: Pages detailing information about a single product.</li>
+<li><strong>Captcha</strong>: Captcha pages that hinder scraping efforts. Currently, we do not provide solutions to circumvent captchas.</li>
+<li><strong>Other</strong>: All other page types not currently supported.</li>
+</ul>
+<p>ScraperAI primarily uses page screenshots and the GPT-4 Vision model for page type determination, with a fallback algorithm for cases where screenshots or Vision model access is unavailable. Users can manually set the page type if known.</p>
+<h3 id="pagination-detector">Pagination Detector</h3>
+<p>This feature is applicable for catalog-type web pages, supporting:</p>
+<ul>
+<li><code>xpath</code>: Xpath of pagination buttons like "Next page", "More", etc.</li>
+<li><code>scroll</code>: Infinite scrolling.</li>
+<li><code>urls</code>: a list of URLs.</li>
+</ul>
+<h3 id="catalog-item-detector">Catalog Item Detector</h3>
+<p>This feature is specifically designed for catalog-type web pages. It identifies repeating elements that typically 
+represent individual data items, such as products, articles, or companies. 
+These elements may appear as visually distinct cards or as rows within a table, facilitating the organized display of information.</p>
+<h3 id="fields-extractor">Fields Extractor</h3>
+<p>The Fields Extractor allows to detect relevant information on the page and then 
+find XPATHs that allows to extract this detected information efficiently.
+This tool can be used to retrieve information from individual catalog item cards or from nested detailing pages.
+We define two types of data fields within HTML page:</p>
+<ul>
+<li><strong>Static fields:</strong> Fields without explicit names, containing single or multiple values (e.g., product names or prices).</li>
+<li><strong>Dynamic fields:</strong> Fields with both names and values, typically formatted like table entries.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Introduction"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../llms/" class="btn btn-neutral float-right" title="LLMs">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/scraperai/scraperai" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../llms/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://docs.scraper-ai.com/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.scraper-ai.com/cli/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.scraper-ai.com/crawlers/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.scraper-ai.com/examples/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.scraper-ai.com/getting-started/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.scraper-ai.com/llms/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.scraper-ai.com/parser/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.scraper-ai.com/scraper/</loc>
+         <lastmod>2025-09-18</lastmod>
+    </url>
+</urlset>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="ScraperAI is an open-source, AI-powered tool designed to simplify web scraping for users of all skill levels." /><meta name="author" content="Iakov Kaiumov" /><link rel="canonical" href="https://docs.scraper-ai.com/" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>ScraperAI</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Introduction";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = "/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> ScraperAI
+        </a>
+        <div class="version">
+          0.0.2
+        </div><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Introduction</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Main Components</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="llms/">LLMs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="crawlers/">Crawler</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="parser/">ParserAI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="scraper/">Scraper</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">CLI</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="cli/">CLI Application</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="examples/">Examples</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">ScraperAI</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/scraperai/scraperai/blob/main/docs/index.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <p align="center">
+  <picture>
+    <img alt="ScraperAI Logo" width="400px" src="https://raw.githubusercontent.com/scraperai/scraperai/main/images/logo.png">
+  </picture>
+</p>
+<h1 align="center">
+  ScraperAI
+</h1>
+<p align="center">
+    ⚡ Scraping has never been easier ⚡
+</p>
+
+<p>ScraperAI is an open-source, AI-powered tool designed to simplify web scraping for users of all skill levels. 
+By leveraging Large Language Models, such as ChatGPT, ScraperAI extracts data from web pages and generates 
+reusable and shareable scraping configs.</p>
+<p>Forget about manually extracting selectors from HTML pages using Developer Consoles. ScraperAI handles this process for you.</p>
+<h1 id="features">Features</h1>
+<ul>
+<li>Serializable &amp; reusable Scraper Configs</li>
+<li>Automatic data detection</li>
+<li>Automatic XPATHs detection</li>
+<li>Automatic pagination &amp; page type detection</li>
+<li>HTML minification</li>
+<li>ChatGPT support</li>
+<li>Custom LLMs support</li>
+<li>Selenium support</li>
+<li>Custom crawlers support</li>
+</ul>
+<h1 id="how-does-scraperai-work">How does ScraperAI work?</h1>
+<p>ScraperAI employs AI models to analyze web pages and generate scraping tasks. 
+These tasks are then utilized to collect data from websites in structured formats such as JSON, CSV, and others.</p>
+<h1 id="who-should-use-scraperai">Who should use ScraperAI?</h1>
+<p>ScraperAI is designed for scientists, analysts, entrepreneurs, and SEO specialists seeking to effortlessly scrape data from the web in a no-code manner. 
+It is particularly useful for those unfamiliar with various scraping techniques or looking to save time and effort when collecting the data.</p>
+<h1 id="how-to-get-started-with-scraperai">How to get started with ScraperAI?</h1>
+<p>To get started with ScraperAI, you first need to install it. You can do this by running the following command:</p>
+<pre><code class="language-console">pip install scraperai
+</code></pre>
+<p>Once you have installed ScraperAI, you can start using a CLI application by calling</p>
+<pre><code class="language-console">scraperai --url https://www.ycombinator.com/companies
+</code></pre>
+<p>command in your console.</p>
+<h1 id="demo">Demo</h1>
+<p>We put some examples of scraper usage <a href="https://github.com/scraperai/scraperai/blob/main/examples/">here</a>.</p>
+<h1 id="support">Support</h1>
+<p>If you have any questions or need help, please open a new issue.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="getting-started/" class="btn btn-neutral float-right" title="Getting Started">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/scraperai/scraperai" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+      <span><a href="getting-started/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2025-09-18 19:02:54.998703+00:00
+-->
