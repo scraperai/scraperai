@@ -82,7 +82,7 @@ class JsonOpenAI(BaseJsonLM):
 
 
 class VisionOpenAI(BaseVision):
-    latest = 'gpt-4-vision-preview'
+    latest = 'gpt-4o'
 
     def __init__(self,
                  openai_api_key: str,
